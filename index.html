@@ -6,8 +6,8 @@
   <meta name="theme-color" content="#ffffff" />
   <meta name="description" content="출발역, 도착역, 날짜만 선택하면 KTX·SRT·일반열차 시간표를 간편하게 확인하는 레일맵" />
   <title>레일맵 RAILMAP | 기차 시간표 간편 검색</title>
-  <link rel="stylesheet" href="./styles.css?v=simple-v5" />
-  <script type="module" src="./app.js?v=seoul-station-v7"></script>
+  <link rel="stylesheet" href="./styles.css?v=train-types-v8" />
+  <script type="module" src="./app.js?v=train-types-v8"></script>
 </head>
 <body>
   <div class="app">
@@ -46,8 +46,8 @@
             <button type="button" class="chip active" data-grade="전체" aria-pressed="true">전체</button>
             <button type="button" class="chip" data-grade="KTX" aria-pressed="false">KTX</button>
             <button type="button" class="chip" data-grade="SRT" aria-pressed="false">SRT</button>
-            <button type="button" class="chip" data-grade="일반" aria-pressed="false">일반열차</button>
-          </div></fieldset>
+            <button type="button" class="chip" data-grade="일반" aria-pressed="false">ITX·일반</button>
+          </div><p class="train-type-hint">KTX에는 산천·이음·청룡, ITX·일반에는 ITX·무궁화호·누리로 등이 포함돼요.</p></fieldset>
           <button id="searchBtn" type="submit" class="search-button"><span>열차 시간표 검색하기</span><span aria-hidden="true">→</span></button>
         </form>
         <p id="notice" class="notice" role="status" aria-live="polite"></p>
