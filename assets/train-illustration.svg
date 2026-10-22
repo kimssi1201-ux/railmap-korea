@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 118" role="img" aria-label="빠르게 달리는 파란색 고속열차">
+<defs>
+ <linearGradient id="train" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#ffffff"/><stop offset="1" stop-color="#d8eafa"/></linearGradient>
+ <linearGradient id="nose" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#2a80d5"/><stop offset="1" stop-color="#0e5295"/></linearGradient>
+ <linearGradient id="sky" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#e6f5ff"/><stop offset="1" stop-color="#f8fcff"/></linearGradient>
+</defs>
+<path d="M35 94h165" stroke="#c4d6e7" stroke-width="3.5" stroke-linecap="round"/>
+<path d="M42 104h148" stroke="#e2edf6" stroke-width="4" stroke-linecap="round"/>
+<ellipse cx="123" cy="97" rx="95" ry="7" fill="#d1e3f0" opacity=".65"/>
+<path d="M15 52c0-8 6-15 14-17l17-5h92c28 0 49 7 67 25l19 20c8 9 4 20-10 20H35C21 95 15 88 15 76V52Z" fill="url(#train)" stroke="#a8cce6" stroke-width="2"/>
+<path d="M134 31c29 0 50 9 67 27l18 18c5 6 2 14-7 15h-38c11-7 17-18 11-29-8-13-27-23-51-31Z" fill="url(#nose)"/>
+<path d="M174 43c12 6 22 15 31 27l-22-1c-7-11-14-17-29-22Z" fill="#a9e3ff" opacity=".95"/>
+<path d="M16 72h155" stroke="#18aeb4" stroke-width="5" opacity=".95"/>
+<path d="M19 78h155" stroke="#73c4de" stroke-width="2"/>
+<rect x="35" y="43" width="25" height="19" rx="4" fill="#246aa2"/>
+<rect x="66" y="43" width="25" height="19" rx="4" fill="#246aa2"/>
+<rect x="97" y="43" width="25" height="19" rx="4" fill="#246aa2"/>
+<rect x="128" y="43" width="21" height="19" rx="4" fill="#246aa2"/>
+<path d="M40 44h10M71 44h10M103 44h10" stroke="#aee2ff" stroke-width="2" opacity=".7" stroke-linecap="round"/>
+<path d="M37 94v4M67 94v4M123 94v4M151 94v4" stroke="#5e7891" stroke-width="3" stroke-linecap="round"/>
+<path d="M26 25h27M18 17h15M199 26h21" stroke="#b4d9ef" stroke-width="4" stroke-linecap="round" opacity=".8"/>
+<circle cx="212" cy="81" r="3" fill="#ffcd74"/>
+<path d="M6 83h8M1 90h17" stroke="#9bcddd" stroke-width="3" stroke-linecap="round"/>
+</svg>

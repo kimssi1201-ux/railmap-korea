@@ -15,3 +15,10 @@
 
 /* Small-screen train type explanation; never widen the search card. */
 .train-type-hint{margin:9px 1px 0;color:#718195;font-size:11px;line-height:1.55;overflow-wrap:anywhere}
+/* Brand illustration: small, lightweight and never pushes the mobile search off screen. */
+.hero-top{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:72px}
+.hero-top .eyebrow{flex:none;max-width:calc(100% - 118px);font-size:10px;line-height:1.35;padding:6px 9px}
+.hero-train{display:block;width:134px;max-width:42%;height:auto;flex:0 0 auto;object-fit:contain}
+.hero-top + h1{margin-top:5px}
+@media(max-width:420px){.hero-top{min-height:61px}.hero-train{width:119px;max-width:40%}.hero-top .eyebrow{font-size:9px;max-width:calc(100% - 114px);padding:6px 8px}.hero{margin-bottom:21px}.hero-top + h1{margin-top:3px}}
+@media(max-width:350px){.hero-top{min-height:58px}.hero-train{width:106px}.hero-top .eyebrow{max-width:calc(100% - 99px);letter-spacing:-.2px}}
