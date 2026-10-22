@@ -11,8 +11,15 @@ export const POPULAR_STATIONS = Object.freeze([
 const normalize = name => String(name ?? '').normalize('NFC').replace(/\([^)]*\)/g,'').replace(/[\s·]/g,'').replace(/역$/,'').toLowerCase();
 
 export function ensurePopularStations(stations){
- const final=[...stations],names=new Set(final.map(s=>normalize(s.name)));
- for(const s of POPULAR_STATIONS){if(!names.has(normalize(s.name))){final.push({...s,source:'station-id-fallback'});names.add(normalize(s.name))}}
+ // Preserve correct TAGO IDs; standardize '서울' and '서울역' to one canonical entry.
+ // Drop names/IDs that would otherwise make a different station appear first.
+ const importantNames=new Set(POPULAR_STATIONS.map(s=>normalize(s.name)));
+ const importantIds=new Set(POPULAR_STATIONS.map(s=>s.id));
+ const final=stations.filter(s=>!importantNames.has(normalize(s.name))&&!importantIds.has(s.id));
+ for(const s of POPULAR_STATIONS){
+  const official=stations.find(item=>item.id===s.id);
+  final.push(official?{...official,name:s.name}:{...s,source:'verified-station-code'});
+ }
  return final.sort((a,b)=>a.name.localeCompare(b.name,'ko'));
 }
 
@@ -33,13 +40,13 @@ async function loadAllStations(env){
  const unique=[...new Map(stations.map(s=>[s.id,s])).values()];
  if(!unique.length)throw new DataError('공식 역 목록을 조회하지 못했습니다. API 권한과 응답을 확인해 주세요.',502);
  const final=ensurePopularStations(unique);
- const supplemented=final.filter(s=>s.source==='station-id-fallback').map(s=>s.name);
+ const supplemented=final.filter(s=>s.source==='verified-station-code').map(s=>s.name);
  return {stations:final,partial:failedCodes.length>0||supplemented.length>0,supplemented};
 }
 export async function onRequestGet({env,request}){
  try{
   // New cache key prevents pre-fix (incomplete) lists from persisting for 24h.
-  const cacheKey=new Request(new URL('/api/stations?v=popular-v2',request.url).toString());
+  const cacheKey=new Request(new URL('/api/stations?v=popular-v3',request.url).toString());
   const cache=typeof caches!=='undefined'?caches.default:null;
   if(cache){const hit=await cache.match(cacheKey);if(hit)return new Response(hit.body,hit)}
   const list=await loadAllStations(env);

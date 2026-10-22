@@ -45,7 +45,7 @@ test('일부 도시 역 데이터가 누락되어도 서울·부산 빠른 구�
  assert.equal(stations.find(s=>s.name==='서울')?.id,'NAT010000');
  assert.equal(stations.find(s=>s.name==='용산')?.id,'NAT010032');
  assert.equal(stations.filter(s=>s.id==='NAT014445').length,1);
- assert.equal(stations.find(s=>s.name==='서울')?.source,'station-id-fallback');
+ assert.equal(stations.find(s=>s.name==='서울')?.source,'verified-station-code');
 });
 
 test('TAGO 원본에 주요 역이 모두 있으면 보완 중복을 만들지 않는다',async()=>{
@@ -53,4 +53,24 @@ test('TAGO 원본에 주요 역이 모두 있으면 보완 중복을 만들지 �
  const stations=ensurePopularStations([{name:'서울',id:'NAT010000'},{name:'부산',id:'NAT014445'},{name:'용산',id:'NAT010032'}]);
  assert.equal(stations.length,3);
  assert.equal(stations.some(s=>s.source==='station-id-fallback'),false);
+});
+
+
+test('서울역 또는 서울 입력은 올바른 TAGO 서울역으로 연결된다',async()=>{
+ const {ensureMajorStations,getStation,searchStations}=await import('../station-utils.js');
+ const original=[{name:'서울(고속철도)',id:'WRONG-ID'},{name:'청량리',id:'NAT130126'},{name:'부산',id:'NAT014445'}];
+ const result=ensureMajorStations(original);
+ assert.equal(getStation(result,'서울')?.id,'NAT010000');
+ assert.equal(getStation(result,'서울역')?.id,'NAT010000');
+ assert.equal(searchStations(result,'서울역')[0]?.name,'서울');
+ assert.equal(searchStations(result,'서울')[0]?.id,'NAT010000');
+ assert.equal(result.filter(x=>x.id==='NAT010000').length,1);
+});
+
+test('서버 API 역 목록 보완: 서울역 이름과 잘못된 같은 이름 ID를 정규화',async()=>{
+ const {ensurePopularStations}=await import('../functions/api/stations.js');
+ const rows=ensurePopularStations([{name:'서울역',id:'BAD'},{name:'부산역',id:'NAT014445'}]);
+ assert.equal(rows.find(s=>s.name==='서울')?.id,'NAT010000');
+ assert.equal(rows.find(s=>s.name==='부산')?.id,'NAT014445');
+ assert.equal(rows.some(s=>s.id==='BAD'),false);
 });
