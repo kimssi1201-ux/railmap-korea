@@ -28,12 +28,6 @@
  .bus-content .date-buttons{justify-content:flex-end}
 }
 
-/* v4: keep same-name terminals in one collapsed row; retain distinct official IDs. */
-.terminal-duplicate-group{border-bottom:1px solid #edf2f8}
-.terminal-duplicate-group .terminal-group-toggle{font-weight:700;background:#f5f9ff}
-.terminal-duplicate-group .terminal-group-toggle small{color:#166bd3}
-.terminal-variants{background:#fff;padding:4px 0 7px 12px}
-.terminal-variants[hidden]{display:none!important}
-.terminal-group-note{padding:6px 11px;color:#73869a;font-size:11px;line-height:1.55;margin:0}
-.terminal-variants .terminal-variant{padding:10px 11px}
-.terminal-variants .terminal-variant strong{font-weight:600;font-size:12px}
+/* v6: place-first picker. Same-name official codes are queried on the server. */
+.bus-content .terminal-choice{min-height:54px}
+.bus-content .terminal-choice small{color:#617c9a;font-weight:700}

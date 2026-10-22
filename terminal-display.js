@@ -30,3 +30,18 @@ export function findUniqueTerminal(terminals, name) {
   const matches=visibleTerminals(terminals).filter(t=>clean(t.name)===clean(name));
   return matches.length===1?matches[0]:null;
 }
+
+
+// Searchers should choose a place, not an opaque API code. The server can
+// query each distinct official ID for the chosen display name.
+export function terminalChoice(group) {
+  if (!group?.name || !Array.isArray(group.terminals) || !group.terminals.length) return null;
+  const ids=[...new Set(group.terminals.map(terminal=>String(terminal.id||'').trim()).filter(Boolean))];
+  return ids.length ? {name:group.name,ids} : null;
+}
+
+export function findTerminalChoice(terminals, name) {
+  const clean=s=>String(s??'').normalize('NFKC').replace(/[\s·()]/g,'').replace(/터미널$|정류장$/,'').toLowerCase();
+  const hits=groupTerminalNames(terminals).filter(group=>clean(group.name)===clean(name));
+  return hits.length===1?terminalChoice(hits[0]):null;
+}

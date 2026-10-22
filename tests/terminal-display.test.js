@@ -98,3 +98,22 @@ test('명칭의 수수료 표기만 걸러내고 실제 버스터미널명은 �
    assert.equal(isDisplayableTerminal({name:n}),true,n);
  }
 });
+
+
+test('이름 중복 전주는 사용자에게 한 번만 노출하고 공식 코드는 모두 보존',async()=>{
+ const {terminalChoice,findTerminalChoice}=await import('../terminal-display.js');
+ const list=[
+  {name:'전주',id:'NAEK600'}, {name:'전주',id:'NAEK601'},
+  {name:'전주',id:'NAEK602'}, {name:'전주',id:'NAEK603'},
+  {name:'전주',id:'NAEK604'}, {name:'전주(602)_수수료',id:'NAEK913'},
+  {name:'광주(유·스퀘어)',id:'NAEK500'}
+ ];
+ const groups=groupTerminalNames(list);
+ assert.equal(groups.length,2);
+ const choice=terminalChoice(groups[0]);
+ assert.equal(choice.name,'전주');
+ assert.deepEqual(choice.ids,['NAEK600','NAEK601','NAEK602','NAEK603','NAEK604']);
+ assert.deepEqual(findTerminalChoice(list,'전주').ids,choice.ids);
+ assert.equal(findTerminalChoice(list,'전주터미널').name,'전주');
+ assert.equal(findTerminalChoice(list,'전주(602)_수수료'),null);
+});

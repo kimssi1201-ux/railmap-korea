@@ -1,4 +1,4 @@
-import {visibleTerminals,groupTerminalNames,findUniqueTerminal} from './terminal-display.js';
+import {visibleTerminals,groupTerminalNames,findTerminalChoice,terminalChoice} from './terminal-display.js';
 'use strict';
 const byId=id=>document.getElementById(id);
 const type=new URLSearchParams(location.search).get('type')==='intercity'?'intercity':'express';
@@ -8,10 +8,10 @@ const state={terminals:[],displayTerminals:[],ready:false,selected:{from:null,to
 function norm(x){return String(x??'').normalize('NFC').replace(/[\s·()]/g,'').replace(/터미널$|정류장$/,'').toLowerCase()}
 function localDate(shift=0){const p=Object.fromEntries(new Intl.DateTimeFormat('en-US',{timeZone:'Asia/Seoul',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date()).map(x=>[x.type,x.value]));return new Date(Date.UTC(+p.year,+p.month-1,+p.day+shift)).toISOString().slice(0,10)}
 function element(tag,content='',cls=''){const n=document.createElement(tag);n.textContent=content;if(cls)n.className=cls;return n}
-function find(name){return findUniqueTerminal(state.displayTerminals,name)}
+function find(name){return findTerminalChoice(state.displayTerminals,name)}
 function notify(message='',kind=''){ui.busNotice.textContent=message;ui.busNotice.className='notice'+(kind?' '+kind:'')}
 function closeSuggestions(){ui.terminalSuggestions.hidden=true;ui.busFrom.setAttribute('aria-expanded','false');ui.busTo.setAttribute('aria-expanded','false')}
-function pick(side,terminal){state.selected[side]=terminal;const input=side==='from'?ui.busFrom:ui.busTo;input.value=terminal.name;closeSuggestions();input.blur()}
+function pick(side,choice){state.selected[side]=choice;const input=side==='from'?ui.busFrom:ui.busTo;input.value=choice.name;closeSuggestions();input.blur()}
 function showSuggestions(side){
  state.focus=side;
  const input=side==='from'?ui.busFrom:ui.busTo;
@@ -23,28 +23,16 @@ function showSuggestions(side){
  ui.terminalSuggestions.replaceChildren();
  if(!state.ready)ui.terminalSuggestions.append(element('div','공식 터미널 목록을 불러오는 중입니다.','no-match'));
  else{
-  const summary=q?`검색 결과 ${groups.length}개 이름 · 중복 터미널 코드는 묶어서 표시합니다.`:`검색 가능한 터미널 이름 ${groupTerminalNames(state.displayTerminals).length}개 · 입력해서 좁혀보세요.`;
+  const summary=q?`검색 결과 ${groups.length}곳 · 같은 이름은 한 번만 표시합니다.`:`검색 가능한 터미널 ${groupTerminalNames(state.displayTerminals).length}곳 · 이름을 입력해 찾으세요.`;
   ui.terminalSuggestions.append(element('div',summary,'terminal-list-hint'));
   if(!groups.length)ui.terminalSuggestions.append(element('div','일치하는 터미널이 없습니다. 다른 이름으로 검색해 보세요.','no-match'));
   for(const group of groups){
-   if(group.terminals.length===1){
-    const t=group.terminals[0],button=element('button');button.type='button';button.setAttribute('role','option');
-    button.append(element('strong',t.name));
-    button.addEventListener('click',()=>pick(side,t));ui.terminalSuggestions.append(button);
-    continue;
-   }
-   const wrap=element('div','','terminal-duplicate-group');
-   const toggle=element('button','','terminal-group-toggle');toggle.type='button';
-   toggle.setAttribute('aria-expanded','false');toggle.append(element('strong',group.name),element('small',`공식 코드 ${group.terminals.length}개 · 펼치기`));
-   const variants=element('div','','terminal-variants');variants.hidden=true;
-   variants.append(element('p','API에 동일한 이름으로 여러 코드가 등록돼 있습니다. 정확한 탑승 장소는 예매처에서 확인하세요.','terminal-group-note'));
-   for(const item of group.terminals){
-    const button=element('button','','terminal-variant');button.type='button';button.setAttribute('role','option');
-    button.append(element('strong',item.name),element('small',`코드 ${item.id}`));
-    button.addEventListener('click',()=>pick(side,item));variants.append(button);
-   }
-   toggle.addEventListener('click',()=>{variants.hidden=!variants.hidden;toggle.setAttribute('aria-expanded',String(!variants.hidden));toggle.querySelector('small').textContent=`공식 코드 ${group.terminals.length}개 · ${variants.hidden?'펼치기':'접기'}`;});
-   wrap.append(toggle,variants);ui.terminalSuggestions.append(wrap);
+   const choice=terminalChoice(group);if(!choice)continue;
+   const button=element('button','','terminal-choice');button.type='button';button.setAttribute('role','option');
+   button.append(element('strong',group.name));
+   if(choice.ids.length>1)button.append(element('small','시간표 통합 조회'));
+   button.addEventListener('click',()=>pick(side,choice));
+   ui.terminalSuggestions.append(button);
   }
  }
  ui.terminalSuggestions.hidden=false;
@@ -57,6 +45,6 @@ function duration(a,b){if(!/^\d{12,14}$/.test(a)||!/^\d{12,14}$/.test(b))return 
 function empty(title,desc){ui.busResults.replaceChildren();const div=element('div','','bus-empty');div.append(element('strong',title),element('span',desc));ui.busResults.append(div)}
 function render(buses,from,to,partial){ui.busResults.replaceChildren();ui.busResultsTitle.textContent=`${from} → ${to}`;ui.busResultCount.textContent=buses.length+'건';if(!buses.length){empty('조회된 배차가 없습니다.','공공데이터에 해당 구간의 시간표가 없어요. 터미널·날짜를 바꿔보세요.');return}for(const bus of buses){const card=element('article','','bus-ride-card');const heading=element('div','','bus-result-head');heading.append(element('span',bus.grade||'등급 미제공','bus-grade'),element('small',intercity?'시외버스':'고속버스'));card.append(heading);const schedule=element('div','','bus-schedule');const left=element('div');left.append(element('div',formatTime(bus.departure),'bus-clock'),element('div',bus.departureName||from,'bus-terminal'));const center=element('div','','bus-duration');center.append(element('div',duration(bus.departure,bus.arrival)),element('div','','bus-line'));const right=element('div','','arrive');right.append(element('div',formatTime(bus.arrival),'bus-clock'),element('div',bus.arrivalName||to,'bus-terminal'));schedule.append(left,center,right);card.append(schedule);const bottom=element('div','','bus-card-foot');const fare=bus.adultFare>0?bus.adultFare.toLocaleString('ko-KR')+'원':'요금 확인 필요';bottom.append(element('span',fare,'bus-fare'));const a=element('a','공식 예매처 ↗','bus-booking');a.href=intercity?'https://txbus.t-money.co.kr/':'https://www.kobus.co.kr/';a.target='_blank';a.rel='noopener noreferrer';bottom.append(a);card.append(bottom);ui.busResults.append(card)}if(partial)ui.busResults.append(element('p','공식 API의 페이지 제한으로 일부 배차만 표시될 수 있습니다.','bus-info-note'))}
 async function loadTerminals(){ui.busStatus.textContent='공식 터미널 연결 중';try{const r=await fetch('/api/bus-terminals?type='+type,{headers:{Accept:'application/json'}});const data=await r.json();if(!r.ok||!data.ok||!Array.isArray(data.terminals))throw Error(data.error||'목록을 불러오지 못했습니다.');state.terminals=data.terminals.filter(x=>x&&x.id&&x.name);state.displayTerminals=visibleTerminals(state.terminals);if(!state.displayTerminals.length)throw Error('조회 가능한 터미널이 없습니다.');state.ready=true;ui.busStatus.textContent=`검색 터미널 ${groupTerminalNames(state.displayTerminals).length}곳`;ui.busStatus.className='service-status ok';if(data.partial)notify('일부 터미널이 목록에서 누락될 수 있습니다.','');if(!ui.terminalSuggestions.hidden&&state.focus)showSuggestions(state.focus);for(const side of ['from','to'])resolve(side)}catch(error){state.ready=false;ui.busStatus.textContent='API 연결 확인 필요';ui.busStatus.className='service-status error';notify(`${error.message} · 공공데이터 활용 승인과 Cloudflare TAGO_API_KEY 설정을 확인해 주세요.`,'error');closeSuggestions()}}
-async function search(e){e.preventDefault();closeSuggestions();if(!state.ready){notify('터미널 API가 아직 연결되지 않았습니다.','error');return}const from=resolve('from'),to=resolve('to');if(!from){notify('출발 터미널이 같은 이름으로 여러 개 있다면 공식 코드를 펼쳐 하나를 선택해 주세요.','error');ui.busFrom.focus();return}if(!to){notify('도착 터미널이 같은 이름으로 여러 개 있다면 공식 코드를 펼쳐 하나를 선택해 주세요.','error');ui.busTo.focus();return}if(from.id===to.id){notify('출발·도착 터미널은 달라야 합니다.','error');return}const date=ui.busDate.value;if(intercity&&date!==localDate()){notify('시외버스는 공식 API에서 오늘 배차만 조회할 수 있습니다.','error');return}if(!intercity&&(date<localDate()||date>localDate(31))){notify('오늘부터 31일 이내 날짜를 선택해 주세요.','error');return}const seq=++state.inFlight;ui.busSubmit.disabled=true;ui.busSubmit.querySelector('span').textContent='조회 중…';notify('');empty('시간표를 조회하고 있어요.','공식 데이터로 확인 중입니다.');ui.busResultsSection.scrollIntoView({block:'start',inline:'nearest',behavior:'smooth'});try{const url=new URL('/api/bus-timetables',location.origin);for(const [k,v] of Object.entries({type,from:from.id,to:to.id,date}))url.searchParams.set(k,v);const r=await fetch(url.toString(),{headers:{Accept:'application/json'}});const data=await r.json();if(seq!==state.inFlight)return;if(!r.ok||!data.ok)throw Error(data.error||'시간표 조회에 실패했습니다.');render(Array.isArray(data.buses)?data.buses:[],from.name,to.name,!!data.partial);notify(`${date} · 공식 ${intercity?'시외':'고속'}버스 배차정보 조회 완료. 잔여좌석과 예매 가능 여부는 예매처에서 확인해 주세요.`,'ok')}catch(error){if(seq!==state.inFlight)return;ui.busResultCount.textContent='—';empty('시간표 조회 실패',error.message);notify(error.message,'error')}finally{if(seq===state.inFlight){ui.busSubmit.disabled=false;ui.busSubmit.querySelector('span').textContent='버스 시간표 검색하기'}}}
+async function search(e){e.preventDefault();closeSuggestions();if(!state.ready){notify('터미널 API가 아직 연결되지 않았습니다.','error');return}const from=resolve('from'),to=resolve('to');if(!from){notify('목록에서 출발 터미널을 선택해 주세요.','error');ui.busFrom.focus();return}if(!to){notify('목록에서 도착 터미널을 선택해 주세요.','error');ui.busTo.focus();return}if(from.name===to.name || (from.ids.length===1&&to.ids.length===1&&from.ids[0]===to.ids[0])){notify('출발·도착 터미널은 달라야 합니다.','error');return}const date=ui.busDate.value;if(intercity&&date!==localDate()){notify('시외버스는 공식 API에서 오늘 배차만 조회할 수 있습니다.','error');return}if(!intercity&&(date<localDate()||date>localDate(31))){notify('오늘부터 31일 이내 날짜를 선택해 주세요.','error');return}const seq=++state.inFlight;ui.busSubmit.disabled=true;ui.busSubmit.querySelector('span').textContent='조회 중…';notify('');empty('시간표를 조회하고 있어요.','공식 데이터로 확인 중입니다.');ui.busResultsSection.scrollIntoView({block:'start',inline:'nearest',behavior:'smooth'});try{const url=new URL('/api/bus-timetables',location.origin);for(const [k,v] of Object.entries({type,from:from.ids.join(','),to:to.ids.join(','),date}))url.searchParams.set(k,v);const r=await fetch(url.toString(),{headers:{Accept:'application/json'}});const data=await r.json();if(seq!==state.inFlight)return;if(!r.ok||!data.ok)throw Error(data.error||'시간표 조회에 실패했습니다.');render(Array.isArray(data.buses)?data.buses:[],from.name,to.name,!!data.partial);notify(data.partial?`${date} · 일부 터미널 코드의 조회가 실패했거나 배차가 더 있을 수 있습니다. 공식 예매처에서도 확인해 주세요.`:`${date} · 공식 ${intercity?'시외':'고속'}버스 배차정보 조회 완료. 잔여좌석과 예매 가능 여부는 예매처에서 확인해 주세요.`,data.partial?'':'ok')}catch(error){if(seq!==state.inFlight)return;ui.busResultCount.textContent='—';empty('시간표 조회 실패',error.message);notify(error.message,'error')}finally{if(seq===state.inFlight){ui.busSubmit.disabled=false;ui.busSubmit.querySelector('span').textContent='버스 시간표 검색하기'}}}
 function start(){ui.busTitle.textContent=intercity?'시외버스 시간표 찾기':'고속버스 시간표 찾기';ui.busIntro.textContent=intercity?'오늘 출발하는 시외버스 배차를 터미널별로 확인하세요.':'터미널과 날짜를 선택하면 공식 배차 정보를 조회합니다.';ui[intercity?'intercityTab':'expressTab'].setAttribute('aria-current','page');ui.busDate.value=localDate();ui.busDate.min=localDate();ui.busDate.max=intercity?localDate():localDate(31);ui.busDateHint.textContent=intercity?'오늘 출발편만 조회':'출발일 기준';ui.busTomorrow.hidden=intercity;ui.dateWarning.hidden=!intercity;for(const side of ['from','to']){const input=side==='from'?ui.busFrom:ui.busTo;input.addEventListener('focus',()=>showSuggestions(side));input.addEventListener('input',()=>{state.selected[side]=null;showSuggestions(side)});input.addEventListener('keydown',event=>{if(event.key==='Escape')closeSuggestions();if(event.key==='Enter'&&!ui.terminalSuggestions.hidden){const first=ui.terminalSuggestions.querySelector('button');if(first){event.preventDefault();first.click()}}})}document.addEventListener('pointerdown',event=>{if(!event.target.closest('.station-fields')&&!event.target.closest('#terminalSuggestions'))closeSuggestions()});ui.busSwap.addEventListener('click',()=>{const temp=ui.busFrom.value;ui.busFrom.value=ui.busTo.value;ui.busTo.value=temp;const old=state.selected.from;state.selected.from=state.selected.to;state.selected.to=old;closeSuggestions()});ui.busToday.addEventListener('click',()=>ui.busDate.value=localDate());ui.busTomorrow.addEventListener('click',()=>ui.busDate.value=localDate(1));ui.busForm.addEventListener('submit',search);loadTerminals()}
 start();

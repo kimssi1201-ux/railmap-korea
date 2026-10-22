@@ -56,3 +56,50 @@ test('고속버스 배차 목록 API 응답 변환',async()=>{
   const json=await r.json();assert.equal(json.buses[0].grade,'우등');assert.equal(json.buses[0].adultFare,32000);assert.equal(json.liveSeats,false);
  }finally{globalThis.fetch=original}
 });
+
+
+test('터미널 ID 조합은 중복을 제거하고 한 번에 36쌍까지만 검색',async()=>{
+ const {parseTerminalIds,busPairs}=await import('../functions/api/bus-timetables.js');
+ assert.deepEqual(parseTerminalIds('NAEK600,NAEK601,NAEK600'),['NAEK600','NAEK601']);
+ assert.deepEqual(busPairs(['NAEK600','NAEK601'],['NAEK602']).map(x=>x.join('/')),['NAEK600/NAEK602','NAEK601/NAEK602']);
+ assert.throws(()=>parseTerminalIds('NAEK010,invalid space'),/터미널 정보/);
+ assert.throws(()=>busPairs(Array.from({length:7},(_,i)=>'N'+i),Array.from({length:7},(_,i)=>'T'+i)),/너무 많/);
+ assert.throws(()=>busPairs(['NAEK600'],['NAEK600']),/다르게/);
+});
+
+test('전주 여러 터미널 코드를 자동 조회하고 동일 배차는 한 번만 표시',async()=>{
+ const original=globalThis.fetch;
+ const calls=[];
+ const p=Object.fromEntries(new Intl.DateTimeFormat('en-US',{timeZone:'Asia/Seoul',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date()).map(x=>[x.type,x.value]));
+ const date=`${p.year}-${p.month}-${p.day}`;
+ globalThis.fetch=async url=>{
+  const u=new URL(url); const from=u.searchParams.get('depTerminalId'); calls.push(from);
+  const common={gradename:'우등',depplandtime:date.replaceAll('-','')+'120000',arrplandtime:date.replaceAll('-','')+'150000',adultcharge:25000,routeid:'R1'};
+  const different={gradename:'일반',depplandtime:date.replaceAll('-','')+'170000',arrplandtime:date.replaceAll('-','')+'194000',adultcharge:20000,routeid:'R2'};
+  const entries=from==='NAEK604'?[different]:[common];
+  return Response.json({response:{header:{resultCode:'00'},body:{items:{item:entries},totalCount:entries.length}}});
+ };
+ try{
+  const query=`https://rail.example/api/bus-timetables?type=express&from=NAEK600,NAEK601,NAEK602,NAEK603,NAEK604&to=NAEK500&date=${date}`;
+  const r=await schedules({env:{TAGO_API_KEY:'mock'},request:new Request(query)});
+  assert.equal(r.status,200);
+  const data=await r.json();
+  assert.equal(data.ok,true);assert.equal(data.partial,false);
+  assert.equal(calls.length,5);assert.equal(data.buses.length,2);
+  assert.deepEqual(data.buses.map(x=>x.grade),['우등','일반']);
+ }finally{globalThis.fetch=original}
+});
+
+test('일부 터미널 코드가 실패하면 성공 결과만 표시하며 부분 결과라고 알림',async()=>{
+ const original=globalThis.fetch;
+ const p=Object.fromEntries(new Intl.DateTimeFormat('en-US',{timeZone:'Asia/Seoul',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date()).map(x=>[x.type,x.value]));
+ const date=`${p.year}-${p.month}-${p.day}`;
+ globalThis.fetch=async url=>{
+  if(new URL(url).searchParams.get('depTerminalId')==='NAEK601')throw Error('rate limited');
+  return Response.json({response:{header:{resultCode:'00'},body:{items:{item:[]},totalCount:0}}});
+ };
+ try{
+  const r=await schedules({env:{TAGO_API_KEY:'mock'},request:new Request(`https://rail.example/api/bus-timetables?type=express&from=NAEK600,NAEK601&to=NAEK500&date=${date}`)});
+  assert.equal(r.status,200);assert.equal((await r.json()).partial,true);
+ }finally{globalThis.fetch=original}
+});
