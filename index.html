@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#10273b" />
+  <meta name="description" content="지도로 역을 찾고, 출발역·도착역·날짜로 전국 열차 시간표를 한눈에 비교하는 기차지도" />
+  <title>레일맵 | 지도로 찾는 기차 시간표</title>
+  <link rel="preconnect" href="https://unpkg.com" crossorigin />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIINfQK3p2ATbUXiOqMkpOun8i3Tf4phxDk=" crossorigin="" />
+  <link rel="stylesheet" href="/styles.css?v=boarding-guide-v3" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" id="plannerSheet" aria-label="기차 검색 패널">
+      <button class="sheet-handle" id="sheetToggleBtn" type="button" aria-expanded="false" aria-controls="plannerContent"><span class="handle-bar"></span><span id="sheetToggleText">기차 시간표 검색 열기</span><span class="sheet-handle-chevron">⌃</span></button>
+      <div class="sheet-preview" id="sheetPreview">
+        <div class="preview-title"><span class="preview-rail-icon">🚆</span><div><strong>출발역 · 도착역으로 열차 찾기</strong><small>KTX · SRT · 일반열차 한눈에 검색</small></div></div>
+        <button type="button" class="preview-cta" id="openPlannerBtn">기차 시간표 검색하기 <span>→</span></button>
+      </div>
+      <header class="brand-row">
+        <a href="/" class="brand" aria-label="레일맵 처음으로"><span class="brand-logo">↗</span><span>RAIL<span class="brand-accent">MAP</span><small>기차 검색을 더 간단하게</small></span></a>
+        <button id="helpBtn" class="icon-button help" type="button" title="이용 안내" aria-label="이용 안내">?</button>
+      </header>
+      <div class="sidebar-scroll" id="plannerContent">
+        <div class="section-kicker"><span class="live-dot"></span> 대한민국 기차지도 <span id="serviceLabel" class="mode-label">데이터 확인 중</span></div>
+        <h1>어디로<br/><em>떠나시나요?</em></h1>
+        <p class="intro">역을 찾고 열차를 비교하세요. 시간표 확인까지 이곳에서.</p>
+        <form id="searchForm" autocomplete="off">
+          <div class="station-picker">
+            <div class="station-field" id="fromField"><span class="field-indicator from"></span><label for="fromInput">출발역</label><input id="fromInput" placeholder="출발역 검색" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="stationSuggestions" autocomplete="off" required /></div>
+            <button id="swapBtn" class="swap-button" type="button" title="출발·도착 바꾸기" aria-label="출발역과 도착역 바꾸기">⇅</button>
+            <div class="station-field" id="toField"><span class="field-indicator to"></span><label for="toInput">도착역</label><input id="toInput" placeholder="도착역 검색" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="stationSuggestions" autocomplete="off" required /></div>
+          </div>
+          <div id="stationSuggestions" class="suggestions" role="listbox" hidden></div>
+          <div class="trip-meta"><div class="date-wrap"><label for="tripDate">가는 날짜</label><input type="date" id="tripDate" required /></div><div class="date-actions"><button type="button" id="todayBtn">오늘</button><button type="button" id="tomorrowBtn">내일</button></div></div>
+          <fieldset class="train-types"><legend>열차 종류</legend><div class="chips" id="typeFilters"><button class="chip active" type="button" data-grade="전체" aria-pressed="true">전체</button><button class="chip" type="button" data-grade="KTX" aria-pressed="false">KTX</button><button class="chip" type="button" data-grade="SRT" aria-pressed="false">SRT</button><button class="chip" type="button" data-grade="일반" aria-pressed="false">일반열차</button></div></fieldset>
+          <button class="primary-button" type="submit" id="searchBtn"><span>열차 시간표 검색</span><span class="button-arrow">↗</span></button>
+        </form>
+        <div id="notice" class="notice" role="status" aria-live="polite"></div>
+        <section class="boarding-feature" aria-label="탑승 위치 안내"><div class="boarding-feature-icon">🚉</div><div class="boarding-feature-text"><strong>몇 번 승강장에서 타나요?</strong><span>열차번호로 타는 곳을 찾는 방법</span></div><button id="platformHelpBtn" type="button">확인 방법 →</button></section>
+        <section class="quick-section"><div class="section-heading"><h2>자주 찾는 구간</h2><button id="clearRecentBtn" class="text-button" type="button" hidden>기록 삭제</button></div><div id="quickRoutes" class="route-pills"></div></section>
+        <section class="fav-section"><div class="section-heading"><h2>즐겨찾는 역</h2><span class="hint">역 선택 후 ☆ 저장</span></div><div id="favorites" class="favorites"></div></section>
+        <section id="resultsSection" class="results-section"><div class="section-heading results-heading"><h2 id="resultsTitle">열차 조회 결과</h2><span id="resultCount" class="result-count">—</span></div><div id="resultToolbar" class="result-toolbar" hidden><label for="sortSelect">정렬</label><select id="sortSelect"><option value="departure">빠른 출발</option><option value="duration">짧은 소요시간</option><option value="fare">낮은 운임</option></select></div><div id="results" class="results"><div class="empty-results"><span class="empty-icon">🚆</span><strong>기차 여행을 시작해 보세요</strong><p>출발역과 도착역을 선택하면<br/>열차 시간표가 여기에 표시됩니다.</p></div></div></section>
+      </div>
+      <footer class="sidebar-footer">자료: 국토교통부 TAGO · 실시간 좌석 예매정보 아님<br/><a href="https://www.data.go.kr/data/15098552/openapi.do" target="_blank" rel="noopener noreferrer">열차 데이터 출처 ↗</a></footer>
+    </aside>
+    <main class="map-area"><div id="map" aria-label="대한민국 기차역 지도"></div>
+      <div class="floating-header">
+        <div class="floating-search-wrap">
+          <div class="map-search-bar"><span class="map-search-icon" aria-hidden="true">⌕</span><input id="mapSearchInput" type="search" autocomplete="off" placeholder="역명·지역을 검색하세요" aria-label="지도에서 기차역 검색" aria-expanded="false" aria-controls="mapSearchResults"/><button type="button" class="map-search-clear" id="mapSearchClear" aria-label="검색 초기화" hidden>×</button></div>
+          <div id="mapSearchResults" class="map-search-results" role="listbox" hidden></div>
+        </div>
+        <button class="top-planner-btn" type="button" id="openPlannerTopBtn">🚆 <span>기차 검색</span></button>
+      </div>
+      <div class="map-top"><div class="map-title"><span class="map-title-icon">⌖</span><span><strong>전국 기차역 지도</strong><small id="mapSubline">주요역 미리보기</small></span></div><div class="map-actions"><button class="map-button" id="locateBtn" type="button" aria-label="내 위치로 이동" title="내 위치">◎ <span>내 위치</span></button><button class="map-button" id="resetMapBtn" type="button">전국보기</button></div></div><div id="mapBottom" class="map-bottom"><strong>지도를 눌러 역을 선택하세요</strong><span>지도 핀은 역 위치 참고용이며 실제 선로 경로가 아닙니다.</span></div><div class="map-legend"><span class="legend-dot"></span> 주요 역 위치 <span class="legend-join"></span> 선택 구간 직선 안내</div></main>
+  </div>
+  <dialog id="stationDialog" class="station-dialog"><div class="dialog-header"><span class="dialog-kicker">STATION</span><button id="closeDialogBtn" class="icon-button" type="button" aria-label="닫기">×</button></div><div id="dialogBody"></div></dialog>
+  <dialog id="boardingDialog" class="boarding-dialog" aria-label="승강장 및 탑승 위치 안내"><div class="dialog-header"><span class="dialog-kicker">BOARDING GUIDE</span><button id="closeBoardingBtn" class="icon-button" type="button" aria-label="타는 곳 안내 닫기">×</button></div><div id="boardingBody"></div></dialog>
+  <dialog id="helpDialog" class="help-dialog"><div class="dialog-header"><strong>레일맵 이용 안내</strong><button id="closeHelpBtn" class="icon-button" type="button" aria-label="닫기">×</button></div><p>레일맵은 출발역·도착역의 운행시간표를 한곳에서 찾아보도록 만든 독립 서비스입니다.</p><p><b>데이터 연결 전:</b> 주요 역의 참고 위치와 즐겨찾기·검색 화면을 체험할 수 있으며 시간표를 임의로 만들어 표시하지 않습니다.</p><p><b>API 연결 후:</b> 국토교통부 TAGO의 날짜별 열차 운행정보를 조회합니다. 운임은 API 제공 시 표시하며 좌석 잔여·실시간 지연 정보는 제공하지 않습니다.</p><p><b>타는 곳:</b> 공식 TAGO 열차 시간표에는 개별 열차의 승강장 번호가 없어 현장 출발 전광판과 역 직원의 안내를 확인해야 합니다. 검색 결과의 ‘탑승 안내’를 누르면 찾는 순서를 볼 수 있습니다.</p><p><b>예매:</b> 결제·발권은 철도운영사의 공식 페이지를 이용합니다. 노선과 정차역은 검색 결과에서 확인하세요.</p><p>지도 자료 © OpenStreetMap 기여자.</p></dialog>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script type="module" src="/app.js?v=boarding-guide-v3"></script>
+</body>
+</html>
