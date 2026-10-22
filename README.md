@@ -52,3 +52,9 @@
 - 국가철도공단의 `코레일 승강장 정보` 파일은 인프라 현황 자료이며, 특정 날짜 열차의 승강장 배정 자료와 동일하지 않습니다. 고정 자료에서 번호를 유추하면 안 됩니다.
 - 향후 승인된 공식 열차별 승강장 피드가 확보되면 서버에서 `(날짜, 출발역, 열차번호)`로 조회/검증/만료처리하고 출처·확인시각을 함께 주어야 합니다. 사용자의 직접 등록·비공식 추정으로 ‘확정 승강장’을 표시해서는 안 됩니다.
 - 공식 정보: https://www.data.go.kr/data/15098552/openapi.do ; https://www.data.go.kr/data/15041187/fileData.do
+
+## Cloudflare Pages 배포 후 확인
+- Cloudflare Pages Production의 Variables and Secrets에 `TAGO_API_KEY`가 암호화되어 등록되어 있는지 확인합니다. 실제 키 값은 GitHub에 기록하지 않습니다.
+- GitHub `main`의 변경이 Cloudflare Pages 자동 배포로 연결되는지 Deployments에서 확인합니다.
+- 사이트에서 역 목록을 불러오고 날짜를 선택하여 열차를 검색해 봅니다. 오류라면 Pages Functions 로그와 TAGO API 사용승인 상태를 확인합니다.
+- 검색 결과의 승강장 번호는 공식 열차별 검증 데이터가 없는 한 ‘현장 확인 필요’로 유지합니다.
