@@ -103,3 +103,34 @@ test('일부 터미널 코드가 실패하면 성공 결과만 표시하며 부�
   assert.equal(r.status,200);assert.equal((await r.json()).partial,true);
  }finally{globalThis.fetch=original}
 });
+
+
+test('버스 시간표 0건의 원본 API 건수와 성공 코드조합을 진단할 수 있다',async()=>{
+ const original=globalThis.fetch;
+ const p=Object.fromEntries(new Intl.DateTimeFormat('en-US',{timeZone:'Asia/Seoul',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date()).map(x=>[x.type,x.value]));
+ const date=`${p.year}-${p.month}-${p.day}`;
+ globalThis.fetch=async()=>Response.json({response:{header:{resultCode:'00'},body:{items:{item:[]},totalCount:0}}});
+ try{
+  const r=await schedules({env:{TAGO_API_KEY:'mock'},request:new Request(`https://test.example/api/bus-timetables?type=intercity&from=NAI12345&to=NAI98765&date=${date}`)});
+  assert.equal(r.status,200);
+  const data=await r.json();
+  assert.equal(data.buses.length,0);
+  assert.deepEqual(data.diagnostics,{checkedPairs:1,successfulPairs:1,failedPairs:0,sourceTotal:0,receivedItems:0,validRows:0});
+  assert.equal(JSON.stringify(data).includes('mock'),false,'API 키는 응답에 노출되지 않음');
+ }finally{globalThis.fetch=original}
+});
+
+test('API 원본에 운행자료가 있는데 출발시간 형식이 누락되면 원본 1건을 진단한다',async()=>{
+ const original=globalThis.fetch;
+ const p=Object.fromEntries(new Intl.DateTimeFormat('en-US',{timeZone:'Asia/Seoul',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date()).map(x=>[x.type,x.value]));
+ const date=`${p.year}-${p.month}-${p.day}`;
+ globalThis.fetch=async()=>Response.json({response:{header:{resultCode:'00'},body:{items:{item:[{departureTime:'not-supported'}]},totalCount:1}}});
+ try{
+  const r=await schedules({env:{TAGO_API_KEY:'mock'},request:new Request(`https://test.example/api/bus-timetables?type=intercity&from=NAI12345&to=NAI98765&date=${date}`)});
+  const data=await r.json();
+  assert.equal(data.buses.length,0);
+  assert.equal(data.diagnostics.sourceTotal,1);
+  assert.equal(data.diagnostics.receivedItems,1);
+  assert.equal(data.diagnostics.validRows,0);
+ }finally{globalThis.fetch=original}
+});

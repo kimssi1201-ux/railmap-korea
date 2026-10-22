@@ -33,9 +33,11 @@ export async function onRequestGet({env,request}){
   // Cache only this service response, never API keys; 2 minutes to limit calls.
   const cacheUrl=new URL('/api/bus-timetables',u.origin);
   for(const [k,v] of Object.entries({type,from:fromIds.join(','),to:toIds.join(','),date}))cacheUrl.searchParams.set(k,v);
+  cacheUrl.searchParams.set('v','diagnostics-v8');
   const cacheKey=new Request(cacheUrl.toString());
   if(cache){const hit=await cache.match(cacheKey);if(hit)return hit}
   const found=new Map();let partial=false,successes=0,failures=0,lastError=null;
+  let sourceTotal=0,receivedItems=0,validRows=0;
   for(let i=0;i<pairs.length;i+=3){
    // Cap concurrent TAGO requests to protect the public API rate limit.
    const batch=await Promise.allSettled(pairs.slice(i,i+3).map(([from,to])=>
@@ -46,12 +48,17 @@ export async function onRequestGet({env,request}){
     successes++;
     const result=item.value;
     partial ||= result.totalCount>result.items.length;
-    for(const row of result.items.map(cleanBus))if(/^\d{12,14}$/.test(row.departure))found.set(uniqueBusKey(row),row);
+    sourceTotal+=result.totalCount;receivedItems+=result.items.length;
+    for(const row of result.items.map(cleanBus)){
+     if(/^\d{12,14}$/.test(row.departure)){validRows++;found.set(uniqueBusKey(row),row)}
+    }
    }
   }
   if(!successes)throw lastError instanceof DataError?lastError:new DataError('버스 시간표 서버 연결에 실패했습니다.',502);
   const buses=[...found.values()].sort((a,b)=>a.departure.localeCompare(b.departure));
-  const response=json({ok:true,type,date,buses,partial,source:'국토교통부 TAGO',liveSeats:false},200,{'Cache-Control':'public,max-age=120,s-maxage=120'});
+  // Public counts only: no API key, private data, upstream URL, or credential in diagnostics.
+  const diagnostics={checkedPairs:pairs.length,successfulPairs:successes,failedPairs:failures,sourceTotal,receivedItems,validRows};
+  const response=json({ok:true,type,date,buses,partial,diagnostics,source:'국토교통부 TAGO',liveSeats:false},200,{'Cache-Control':'public,max-age=120,s-maxage=120'});
   if(cache)await cache.put(cacheKey,response.clone());
   return response;
  }catch(error){return json({ok:false,error:error instanceof DataError?error.message:'버스 시간표 조회에 실패했습니다.'},error.status||502)}
