@@ -38,3 +38,19 @@ test('TAGO 응답의 실제 출발·도착시간 추출',async()=>{
  const mock=async()=>Response.json({response:{header:{resultCode:'00'},body:{totalCount:1,items:{item:{traingradename:'KTX',depplandtime:20261022120000,arrplandtime:20261022142500,adultcharge:50000}}}}});
  const v=await callTago({TAGO_API_KEY:'test-key'},'GetStrtpntAlocFndTrainInfo',{depPlaceId:'NAT010000'},mock);assert.equal(v.items.length,1);assert.equal(v.items[0].adultcharge,50000)
 });
+
+test('일부 도시 역 데이터가 누락되어도 서울·부산 빠른 구간의 공개 역 코드를 보완한다',async()=>{
+ const {ensurePopularStations}=await import('../functions/api/stations.js');
+ const stations=ensurePopularStations([{name:'대전',id:'NAT011668'},{name:'부산역',id:'NAT014445'}]);
+ assert.equal(stations.find(s=>s.name==='서울')?.id,'NAT010000');
+ assert.equal(stations.find(s=>s.name==='용산')?.id,'NAT010032');
+ assert.equal(stations.filter(s=>s.id==='NAT014445').length,1);
+ assert.equal(stations.find(s=>s.name==='서울')?.source,'station-id-fallback');
+});
+
+test('TAGO 원본에 주요 역이 모두 있으면 보완 중복을 만들지 않는다',async()=>{
+ const {ensurePopularStations}=await import('../functions/api/stations.js');
+ const stations=ensurePopularStations([{name:'서울',id:'NAT010000'},{name:'부산',id:'NAT014445'},{name:'용산',id:'NAT010032'}]);
+ assert.equal(stations.length,3);
+ assert.equal(stations.some(s=>s.source==='station-id-fallback'),false);
+});
