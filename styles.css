@@ -78,3 +78,66 @@ body{background:#e3eaf0}
 .station-boarding-help{margin-top:15px;border-radius:12px;border:1px solid #dde9ed;background:#f5fafb;padding:12px}.station-boarding-help b{font-size:13px;color:#205067}.station-boarding-help p{font-size:11px;line-height:1.65;color:#69818d;margin:6px 0 10px}.station-boarding-help button{border:0;background:#dff2ef;color:#086961;border-radius:8px;padding:9px 10px;font-size:11px;font-weight:800}
 .boarding-dialog{border:1px solid #deeaeb;border-radius:19px;box-shadow:0 21px 70px #09263159;padding:20px 20px 22px;width:min(438px,calc(100vw - 24px));max-height:min(88dvh,820px);overflow:auto;color:#153846}.boarding-dialog::backdrop{background:#0a213e88;backdrop-filter:blur(2px)}.boarding-dialog .dialog-header{margin-bottom:8px}.boarding-guide-eyebrow{font-size:10px;font-weight:850;color:#079e93;letter-spacing:.06em;margin:6px 0}.boarding-guide-title{font-size:25px;line-height:1.25;letter-spacing:-1px;margin:4px 0 8px}.boarding-train-meta{display:flex;gap:6px;margin-bottom:12px}.boarding-train-meta:empty{display:none}.boarding-train-meta span{border:1px solid #d8e6eb;background:#f5f9fa;padding:6px 9px;border-radius:99px;font-size:11px;color:#4a6c78}.platform-big{display:flex;flex-direction:column;gap:5px;background:linear-gradient(140deg,#14354e,#0d6d78);padding:17px 18px;border-radius:13px;color:white;margin-top:12px}.platform-big .platform-label{font-size:11px;font-weight:700;color:#a6d9df}.platform-big strong{font-size:26px;letter-spacing:-1px}.platform-big small{font-size:10px;line-height:1.6;color:#d5e9e9}.platform-big.platform-verified{background:linear-gradient(140deg,#065c51,#0a9c8d)}.boarding-steps-heading{font-size:14px;margin:20px 0 10px}.boarding-steps{padding:0;list-style:none;display:grid;gap:10px;margin:0}.boarding-steps li{display:flex;align-items:flex-start;gap:10px}.step-number{display:grid;place-items:center;flex:none;width:26px;height:26px;border-radius:100%;background:#e5f5f2;color:#078b7c;font-size:11px;font-weight:900}.boarding-steps li strong{display:block;font-size:12px;color:#254757;padding-top:3px}.boarding-steps li p{margin:5px 0 0;color:#78909a;font-size:11px;line-height:1.6}.boarding-safety{margin-top:17px;border-radius:10px;padding:12px;background:#fff8ec;color:#916d38;font-size:11px;line-height:1.7}.boarding-dialog-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}.boarding-dialog-actions button,.boarding-dialog-actions a{display:flex;align-items:center;justify-content:center;text-align:center;min-height:39px;border:0;border-radius:8px;background:#e9f3f5;color:#1a6977;font-size:12px;font-weight:800;text-decoration:none}.boarding-dialog-actions a{background:#123a50;color:#fff}
 @media(max-width:800px){.boarding-feature{margin-top:12px;padding:10px}.boarding-dialog{width:calc(100vw - 22px);max-height:88dvh}.boarding-dialog .dialog-header{margin-bottom:6px}.boarding-guide-title{font-size:23px}}
+
+
+/* RAILMAP v4 - compact, single-column iPhone map experience */
+@media (max-width:800px) {
+ html,body{max-width:100%;width:100%;overflow-x:hidden;overscroll-behavior-x:none}
+ .app-shell{max-width:100vw;overflow:hidden;min-height:0;position:fixed;inset:0}
+ .map-area{width:100vw;max-width:100vw;overflow:hidden}
+ .floating-header{max-width:calc(100vw - 24px)}
+ .map-search-bar,.floating-search-wrap{max-width:100%;min-width:0}
+ .map-search-bar input{font-size:16px}
+ .top-planner-btn{flex-shrink:0}
+ .sidebar{left:0;right:0;width:100vw;max-width:100vw;height:128px;padding-bottom:env(safe-area-inset-bottom,0px);border-radius:20px 20px 0 0;box-sizing:border-box}
+ .sidebar.sheet-expanded{height:min(66dvh,610px);max-height:calc(100dvh - 122px)}
+ .sheet-handle{height:35px;min-height:35px;font-size:12px;flex-shrink:0}
+ .sheet-handle .handle-bar{top:5px;width:36px}
+ .sheet-preview{gap:7px;padding:4px 16px 8px;justify-content:space-between}
+ .preview-title{gap:8px}
+ .preview-rail-icon{width:29px;height:29px;font-size:15px;border-radius:9px}
+ .preview-title strong{font-size:13px;letter-spacing:0}
+ .preview-title small{display:none}
+ .preview-cta{padding:10px 13px;border-radius:10px;font-size:13px;min-height:39px}
+ .sidebar.sheet-expanded .brand-row{display:none}
+ .sidebar.sheet-expanded .sidebar-scroll{display:flex;flex-direction:column;min-height:0;min-width:0;overflow-x:hidden;overflow-y:auto;touch-action:pan-y;overscroll-behavior-x:none;padding:10px 15px calc(env(safe-area-inset-bottom,0px) + 24px)}
+ .sidebar.sheet-expanded .sidebar-scroll::before{content:'열차 시간표 검색';display:block;flex:none;order:0;font-size:17px;font-weight:850;letter-spacing:-.4px;color:#163b55;margin-bottom:11px}
+ .sidebar.sheet-expanded .sidebar-scroll > .section-kicker,
+ .sidebar.sheet-expanded .sidebar-scroll > h1,
+ .sidebar.sheet-expanded .sidebar-scroll > .intro{display:none}
+ .sidebar.sheet-expanded .sidebar-scroll > *{min-width:0;max-width:100%}
+ .sidebar.sheet-expanded #searchForm{order:1;margin:0;min-width:0;width:100%}
+ .sidebar.sheet-expanded #notice{order:2}
+ .sidebar.sheet-expanded .results-section{order:3;margin-top:14px;padding-top:13px}
+ .sidebar.sheet-expanded .boarding-feature{order:4}
+ .sidebar.sheet-expanded .quick-section{order:5}
+ .sidebar.sheet-expanded .fav-section{order:6}
+ .station-picker{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);width:100%;min-width:0;overflow:visible}
+ .station-field{width:auto;min-width:0;max-width:100%;min-height:60px;padding:9px 7px 8px 23px}
+ .station-field label{font-size:10px}
+ .station-field input{min-width:0;width:100%;max-width:100%;font-size:16px;white-space:nowrap;text-overflow:ellipsis}
+ .field-indicator{left:7px;top:27px;width:9px;height:9px;border-width:2px}
+ .swap-button{right:calc(50% - 15px);top:15px;width:30px;height:30px;font-size:18px}
+ .trip-meta{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:end;gap:8px;width:100%;margin-top:13px}
+ .date-wrap{width:100%;min-width:0;max-width:100%}
+ .date-wrap input{width:100%;min-width:0;max-width:100%;height:42px;font-size:16px;padding:0 7px;background:#fff}
+ .date-actions{flex:none;gap:5px}
+ .date-actions button{flex:none;min-width:44px;height:42px;padding:0 8px;font-size:12px}
+ .train-types{margin:12px 0 14px;min-width:0}
+ .chips{flex-wrap:wrap;gap:5px}.chip{padding:8px 11px;font-size:12px}
+ .primary-button{min-height:46px;padding:12px 15px;font-size:14px}
+ .results-section,.results{max-width:100%;min-width:0}
+ .result-card{max-width:100%;min-width:0;padding:12px}
+ .times{grid-template-columns:minmax(0,1fr) minmax(72px,auto) minmax(0,1fr);gap:5px}
+ .duration{min-width:72px}.times .clock{font-size:21px}
+ .boarding-row{flex-wrap:wrap}.boarding-guide-btn{max-width:100%;white-space:normal}
+ .boarding-feature{max-width:100%}
+ .sidebar.sheet-expanded .sidebar-footer{display:none}
+}
+@media(max-width:360px){
+ .trip-meta{grid-template-columns:minmax(0,1fr) auto;gap:5px}
+ .date-actions button{min-width:36px;padding:0 5px;font-size:11px}
+ .station-field{padding-left:19px}
+ .field-indicator{left:5px}
+ .top-planner-btn{min-width:72px;padding:0 7px}
+}

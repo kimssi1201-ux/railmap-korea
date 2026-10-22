@@ -8,7 +8,7 @@
   <title>레일맵 | 지도로 찾는 기차 시간표</title>
   <link rel="preconnect" href="https://unpkg.com" crossorigin />
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIINfQK3p2ATbUXiOqMkpOun8i3Tf4phxDk=" crossorigin="" />
-  <link rel="stylesheet" href="/styles.css?v=boarding-guide-v3" />
+  <link rel="stylesheet" href="/styles.css?v=mobile-map-v4" />
 </head>
 <body>
   <div class="app-shell">
@@ -59,6 +59,6 @@
   <dialog id="boardingDialog" class="boarding-dialog" aria-label="승강장 및 탑승 위치 안내"><div class="dialog-header"><span class="dialog-kicker">BOARDING GUIDE</span><button id="closeBoardingBtn" class="icon-button" type="button" aria-label="타는 곳 안내 닫기">×</button></div><div id="boardingBody"></div></dialog>
   <dialog id="helpDialog" class="help-dialog"><div class="dialog-header"><strong>레일맵 이용 안내</strong><button id="closeHelpBtn" class="icon-button" type="button" aria-label="닫기">×</button></div><p>레일맵은 출발역·도착역의 운행시간표를 한곳에서 찾아보도록 만든 독립 서비스입니다.</p><p><b>데이터 연결 전:</b> 주요 역의 참고 위치와 즐겨찾기·검색 화면을 체험할 수 있으며 시간표를 임의로 만들어 표시하지 않습니다.</p><p><b>API 연결 후:</b> 국토교통부 TAGO의 날짜별 열차 운행정보를 조회합니다. 운임은 API 제공 시 표시하며 좌석 잔여·실시간 지연 정보는 제공하지 않습니다.</p><p><b>타는 곳:</b> 공식 TAGO 열차 시간표에는 개별 열차의 승강장 번호가 없어 현장 출발 전광판과 역 직원의 안내를 확인해야 합니다. 검색 결과의 ‘탑승 안내’를 누르면 찾는 순서를 볼 수 있습니다.</p><p><b>예매:</b> 결제·발권은 철도운영사의 공식 페이지를 이용합니다. 노선과 정차역은 검색 결과에서 확인하세요.</p><p>지도 자료 © OpenStreetMap 기여자.</p></dialog>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-  <script type="module" src="/app.js?v=boarding-guide-v3"></script>
+  <script type="module" src="/app.js?v=mobile-map-v4"></script>
 </body>
 </html>

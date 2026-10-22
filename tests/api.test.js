@@ -22,7 +22,8 @@ test('KST 날짜 검증 및 31일 범위',()=>{
 });
 test('TAGO 키 없으면 API를 호출하지 않고 오류 반환',async()=>{
  await assert.rejects(()=>callTago({},'GetCtyCodeList',{},()=>{throw new Error('must not call')}),DataError);
- const r=await getTrains({env:{},request:new Request('https://rail.example/api/trains?from=NAT010000&to=NAT014445&date=2026-10-22')});
+ const currentKst = new Date(Date.now()+9*3600*1000).toISOString().slice(0,10);
+ const r=await getTrains({env:{},request:new Request(`https://rail.example/api/trains?from=NAT010000&to=NAT014445&date=${currentKst}`)});
  assert.equal(r.status,503);assert.equal((await r.json()).ok,false);
 });
 test('잘못된 날짜/출도착역은 API 조회 전에 차단',async()=>{

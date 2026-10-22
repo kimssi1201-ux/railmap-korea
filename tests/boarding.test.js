@@ -13,7 +13,8 @@ test('열차 API 결과에서도 임의 승강장 번호를 전달하지 않음'
   const orig=globalThis.fetch;
   globalThis.fetch=async()=>Response.json({response:{header:{resultCode:'00'},body:{totalCount:1,items:{item:{traingradename:'KTX',trainno:'123',depplandtime:20261022200000,arrplandtime:20261022220000,platform:'4',platformNo:'4'}}}}});
   try{
-    const request=new Request('https://railmap.example/api/trains?from=NAT010000&to=NAT014445&date=2026-10-22');
+    const currentKst = new Date(Date.now()+9*3600*1000).toISOString().slice(0,10);
+    const request=new Request(`https://railmap.example/api/trains?from=NAT010000&to=NAT014445&date=${currentKst}`);
     const res=await getTrains({env:{TAGO_API_KEY:'test'},request});
     assert.equal(res.status,200);
     const data=await res.json();
