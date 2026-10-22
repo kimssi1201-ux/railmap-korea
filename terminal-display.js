@@ -1,8 +1,12 @@
-// Hide ambiguous API-only numbered sections from the public terminal picker.
-// Keep all server-supplied terminal records intact for data integrity.
+// Hide API-only administrative labels in the public picker.
+// IMPORTANT: keep distinct real terminal locations (e.g. 광주(유·스퀘어), 광주비아, 경기광주).
+// Raw TAGO terminal records and their IDs remain unchanged on the server.
 export function isDisplayableTerminal(terminal) {
   const name = String(terminal?.name ?? '').normalize('NFKC').trim();
-  return name.length > 0 && !/^\d+\s*구간$/u.test(name);
+  return name.length > 0
+    && !/^\d+\s*구간$/u.test(name)
+    // TAGO sometimes includes extra fare/fee-only aliases, e.g. 광주(500)_수수료.
+    && !/(?:[_\s-]*수수료)\s*$/u.test(name);
 }
 export function visibleTerminals(terminals) {
   return Array.isArray(terminals) ? terminals.filter(isDisplayableTerminal) : [];

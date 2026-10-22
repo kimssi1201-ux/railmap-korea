@@ -63,3 +63,38 @@ test('전주만이 아니라 모든 지역의 동명이름은 공통 규칙으�
  assert.equal(findUniqueTerminal(names,'경주'),null);
  assert.equal(findUniqueTerminal(names,'부산')?.id,'BUSAN1');
 });
+
+
+test('전주·광주의 수수료 전용 코드는 숨기고 서로 다른 실제 터미널은 보존',()=>{
+ const source=[
+  {name:'광주',id:'NAEK100'},
+  {name:'광주(500)_수수료',id:'NAEK911'},
+  {name:'광주비아(503)_수수료',id:'NAEK912'},
+  {name:'광주(유·스퀘어)',id:'NAEK500'},
+  {name:'광주비아',id:'NAEK503'},
+  {name:'광주운암',id:'NAEK504'},
+  {name:'경기광주',id:'NAEK151'},
+  {name:'전주(602)_수수료',id:'NAEK913'},
+  {name:'전주',id:'NAEK601'},
+  {name:'전주',id:'NAEK602'},
+  {name:'서울경부',id:'NAEK010'}
+ ];
+ const visible=visibleTerminals(source);
+ assert.deepEqual(visible.map(x=>x.name),['광주','광주(유·스퀘어)','광주비아','광주운암','경기광주','전주','전주','서울경부']);
+ assert.equal(source.length,11,'TAGO 원본 기록은 그대로 보존');
+ const groups=groupTerminalNames(visible);
+ assert.equal(groups.find(x=>x.name==='전주').terminals.length,2,'동명이름 공식 코드는 그대로 보존');
+ assert.equal(groups.find(x=>x.name==='광주(유·스퀘어)').terminals.length,1);
+ assert.equal(groups.find(x=>x.name==='광주비아').terminals.length,1);
+ assert.equal(groups.find(x=>x.name==='경기광주').terminals.length,1);
+ assert.equal(findUniqueTerminal(visible,'전주'),null,'두 개 코드 중 아무거나 선택하면 안 된다');
+});
+
+test('명칭의 수수료 표기만 걸러내고 실제 버스터미널명은 통과',()=>{
+ for(const n of ['광주(500)_수수료','전주(602)_수수료','광주(503) 수수료','7구간']){
+   assert.equal(isDisplayableTerminal({name:n}),false,n);
+ }
+ for(const n of ['광주(유·스퀘어)','광주비아','광주운암','경기광주','서울경부','제2터미널','운임수수료센터 터미널']){
+   assert.equal(isDisplayableTerminal({name:n}),true,n);
+ }
+});
