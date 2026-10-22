@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<meta name="theme-color" content="#ffffff" />
+<meta name="description" content="전국 고속버스·시외버스 공식 터미널 및 배차 시간표 검색" />
+<title>레일맵 | 고속·시외버스 시간표</title>
+<link rel="stylesheet" href="./styles.css?v=bus-v1" />
+<link rel="stylesheet" href="./bus.css?v=bus-v1" />
+<script type="module" src="./bus.js?v=bus-v1"></script>
+</head>
+<body>
+<div class="app">
+ <header class="site-header"><a href="/" class="logo" aria-label="레일맵 홈"><span class="logo-icon" aria-hidden="true">🚆</span><span>RAIL<span>MAP</span></span></a><span class="bus-header-caption">전국 교통 시간표</span></header>
+ <main class="content bus-content">
+  <nav class="transport-tabs" aria-label="교통수단 선택"><a href="/">🚆 기차</a><a href="/bus.html?type=express" id="expressTab">🚌 고속버스</a><a href="/bus.html?type=intercity" id="intercityTab">🚍 시외버스</a></nav>
+  <section class="bus-hero"><div class="bus-hero-icon" aria-hidden="true">🚌</div><div><span class="eyebrow">전국 버스 시간표</span><h1 id="busTitle">고속버스 시간표 찾기</h1><p id="busIntro">터미널과 날짜를 선택하면 공식 배차 정보를 조회합니다.</p></div></section>
+  <section class="search-card" aria-labelledby="busSearchTitle">
+   <div class="card-head"><h2 id="busSearchTitle">터미널 검색</h2><span id="busStatus" class="service-status" role="status">터미널 연결 중</span></div>
+   <form id="busForm" autocomplete="off">
+    <div class="station-fields"><div class="station-box"><label for="busFrom"><span class="route-dot from"></span>출발 터미널</label><input id="busFrom" type="search" placeholder="출발지 검색" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="terminalSuggestions" required /></div><button id="busSwap" class="swap-button" type="button" aria-label="출발·도착 바꾸기">⇄</button><div class="station-box"><label for="busTo"><span class="route-dot to"></span>도착 터미널</label><input id="busTo" type="search" placeholder="도착지 검색" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="terminalSuggestions" required /></div></div>
+    <div id="terminalSuggestions" class="suggestions" role="listbox" hidden></div>
+    <div class="date-block"><div class="date-head"><label for="busDate">가는 날짜</label><span id="busDateHint">출발일 기준</span></div><div class="date-row"><input id="busDate" type="date" required/><div class="date-buttons"><button id="busToday" type="button">오늘</button><button id="busTomorrow" type="button">내일</button></div></div><p id="dateWarning" class="bus-date-warning" hidden>시외버스는 현재 공공데이터에서 당일 배차만 제공하므로 오늘 날짜만 조회할 수 있습니다.</p></div>
+    <button class="search-button" id="busSubmit" type="submit"><span>버스 시간표 검색하기</span><span aria-hidden="true">→</span></button>
+   </form>
+   <p id="busNotice" class="notice" role="status" aria-live="polite"></p>
+  </section>
+  <section id="busResultsSection" class="results-section"><div class="section-title"><div><span class="eyebrow-small">BUS SCHEDULE</span><h2 id="busResultsTitle">버스 검색 결과</h2></div><span id="busResultCount" class="result-count">—</span></div><div id="busResults" class="result-list"><div class="empty-state"><span>🚌</span><strong>원하는 터미널을 검색하세요</strong><p>시간표는 국토교통부 공식 API에서 조회합니다.</p></div></div></section>
+  <p class="source-note">자료: 국토교통부 TAGO · 제공되지 않는 운행정보와 요금은 임의로 채우지 않습니다. 잔여좌석·취소·예매 가능 여부는 각 예매처에서 확인하세요.</p>
+ </main>
+ <footer class="footer"><span>© RAILMAP</span><div><a href="https://www.data.go.kr/data/15098522/openapi.do" target="_blank" rel="noopener noreferrer">고속버스 출처 ↗</a><a href="https://www.data.go.kr/data/15098541/openapi.do" target="_blank" rel="noopener noreferrer">시외버스 출처 ↗</a></div></footer>
+</div>
+</body>
+</html>

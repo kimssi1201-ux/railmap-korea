@@ -6,8 +6,9 @@
   <meta name="theme-color" content="#ffffff" />
   <meta name="description" content="출발역, 도착역, 날짜만 선택하면 KTX·SRT·일반열차 시간표를 간편하게 확인하는 레일맵" />
   <title>레일맵 RAILMAP | 기차 시간표 간편 검색</title>
-  <link rel="stylesheet" href="./styles.css?v=train-banner-v10" />
-  <script type="module" src="./app.js?v=train-banner-v10"></script>
+  <link rel="stylesheet" href="./styles.css?v=bus-v1" />
+  <link rel="stylesheet" href="./bus.css?v=bus-v1" />
+  <script type="module" src="./app.js?v=bus-v1"></script>
 </head>
 <body>
   <div class="app">
@@ -17,11 +18,12 @@
     </header>
 
     <main class="content">
+      <nav class="transport-tabs" aria-label="교통수단 선택"><a href="/" aria-current="page">🚆 기차</a><a href="/bus.html?type=express">🚌 고속버스</a><a href="/bus.html?type=intercity">🚍 시외버스</a></nav>
       <section class="hero hero-banner" aria-labelledby="pageTitle">
         <h1 id="pageTitle" class="sr-only">레일맵 - 전국 열차 시간표 간편 검색</h1>
         <picture>
           <source media="(max-width: 680px)" srcset="./assets/railmap-banner-mobile.webp" type="image/webp" />
-          <img src="./assets/railmap-banner-wide.webp" alt="레일맵: 코레일 들어가지 않고 빠르게 열차 찾기. 파란색 고속열차 일러스트" width="1152" height="161" decoding="async" fetchpriority="high" />
+          <img src="./assets/railmap-banner-wide.webp" alt="열차 일러스트와 레일맵 안내: 코레일 들어가지 않고 빠르게 열차 찾기" width="1152" height="161" decoding="async" fetchpriority="high" />
         </picture>
       </section>
 
