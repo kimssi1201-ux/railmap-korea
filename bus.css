@@ -31,3 +31,6 @@
 /* v6: place-first picker. Same-name official codes are queried on the server. */
 .bus-content .terminal-choice{min-height:54px}
 .bus-content .terminal-choice small{color:#617c9a;font-weight:700}
+/* Clarify zero API results without implying the route has been discontinued. */
+.empty-verify-links{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin:12px 0 0}
+.empty-verify-links a{display:inline-flex;align-items:center;justify-content:center;min-height:42px;padding:10px 14px;background:#eaf3ff;border:1px solid #bcd7fa;color:#165fba;border-radius:10px;font-size:12px;font-weight:800;text-align:center}
