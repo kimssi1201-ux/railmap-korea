@@ -11,7 +11,36 @@ function find(name){const q=norm(name);return state.terminals.find(x=>norm(x.nam
 function notify(message='',kind=''){ui.busNotice.textContent=message;ui.busNotice.className='notice'+(kind?' '+kind:'')}
 function closeSuggestions(){ui.terminalSuggestions.hidden=true;ui.busFrom.setAttribute('aria-expanded','false');ui.busTo.setAttribute('aria-expanded','false')}
 function pick(side,terminal){state.selected[side]=terminal;const input=side==='from'?ui.busFrom:ui.busTo;input.value=terminal.name;closeSuggestions();input.blur()}
-function showSuggestions(side){state.focus=side;const input=side==='from'?ui.busFrom:ui.busTo;const q=norm(input.value);const items=state.terminals.filter(x=>!q||norm(x.name).includes(q)).sort((a,b)=>a.name.length-b.name.length||a.name.localeCompare(b.name,'ko')).slice(0,12);ui.terminalSuggestions.replaceChildren();if(!state.ready)ui.terminalSuggestions.append(element('div','공식 터미널을 불러오는 중입니다.','no-match'));else if(!items.length)ui.terminalSuggestions.append(element('div','일치하는 터미널이 없습니다.','no-match'));else for(const item of items){const button=element('button','','');button.type='button';button.setAttribute('role','option');button.append(element('strong',item.name),element('small',item.id));button.addEventListener('click',()=>pick(side,item));ui.terminalSuggestions.append(button)}ui.terminalSuggestions.hidden=false;input.setAttribute('aria-expanded','true')}
+function showSuggestions(side){
+ state.focus=side;
+ const input=side==='from'?ui.busFrom:ui.busTo;
+ const q=norm(input.value);
+ const items=state.terminals.filter(x=>!q||norm(x.name).includes(q)).sort((a,b)=>{
+  if(q){const ax=norm(a.name),bx=norm(b.name);const rank=x=>x===q?0:x.startsWith(q)?1:2;const diff=rank(ax)-rank(bx);if(diff)return diff;}
+  return a.name.localeCompare(b.name,'ko')||a.id.localeCompare(b.id);
+ });
+ ui.terminalSuggestions.replaceChildren();
+ if(!state.ready){ui.terminalSuggestions.append(element('div','공식 터미널 목록을 불러오는 중입니다.','no-match'));}
+ else{
+  const summary=q?`검색 결과 ${items.length}개 · 이름을 더 입력하면 좁혀집니다.`:`전체 ${state.terminals.length}개 터미널 · 아래로 스크롤하거나 이름을 입력해 찾으세요.`;
+  ui.terminalSuggestions.append(element('div',summary,'terminal-list-hint'));
+  if(!items.length)ui.terminalSuggestions.append(element('div','일치하는 터미널이 없습니다. 다른 이름으로 검색해 보세요.','no-match'));
+  else{
+   const group=document.createDocumentFragment();
+   for(const item of items){
+    const button=element('button','','');
+    button.type='button';button.setAttribute('role','option');
+    button.append(element('strong',item.name),element('small',item.id));
+    button.addEventListener('click',()=>pick(side,item));
+    group.append(button);
+   }
+   ui.terminalSuggestions.append(group);
+  }
+ }
+ ui.terminalSuggestions.hidden=false;
+ ui.terminalSuggestions.scrollTop=0;
+ input.setAttribute('aria-expanded','true');
+}
 function resolve(side){const input=side==='from'?ui.busFrom:ui.busTo;const existing=state.selected[side];if(existing&&norm(existing.name)===norm(input.value))return existing;const match=find(input.value);if(match){state.selected[side]=match;input.value=match.name}return match}
 function formatTime(s){return /^\d{12,14}$/.test(String(s))?String(s).slice(8,10)+':'+String(s).slice(10,12):'—'}
 function duration(a,b){if(!/^\d{12,14}$/.test(a)||!/^\d{12,14}$/.test(b))return '소요시간 미제공';const start=Date.UTC(+a.slice(0,4),+a.slice(4,6)-1,+a.slice(6,8),+a.slice(8,10),+a.slice(10,12));const end=Date.UTC(+b.slice(0,4),+b.slice(4,6)-1,+b.slice(6,8),+b.slice(8,10),+b.slice(10,12));const delta=(end-start)/60000;if(delta<0||!Number.isFinite(delta))return '소요시간 미제공';const h=Math.floor(delta/60),m=delta%60;return h?`${h}시간 ${m}분`:`${m}분`}

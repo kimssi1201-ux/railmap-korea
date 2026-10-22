@@ -6,9 +6,9 @@
 <meta name="theme-color" content="#ffffff" />
 <meta name="description" content="전국 고속버스·시외버스 공식 터미널 및 배차 시간표 검색" />
 <title>레일맵 | 고속·시외버스 시간표</title>
-<link rel="stylesheet" href="./styles.css?v=bus-v1" />
-<link rel="stylesheet" href="./bus.css?v=bus-v1" />
-<script type="module" src="./bus.js?v=bus-v1"></script>
+<link rel="stylesheet" href="./styles.css?v=bus-v2" />
+<link rel="stylesheet" href="./bus.css?v=bus-v2" />
+<script type="module" src="./bus.js?v=bus-v2"></script>
 </head>
 <body>
 <div class="app">
@@ -20,7 +20,7 @@
    <div class="card-head"><h2 id="busSearchTitle">터미널 검색</h2><span id="busStatus" class="service-status" role="status">터미널 연결 중</span></div>
    <form id="busForm" autocomplete="off">
     <div class="station-fields"><div class="station-box"><label for="busFrom"><span class="route-dot from"></span>출발 터미널</label><input id="busFrom" type="search" placeholder="출발지 검색" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="terminalSuggestions" required /></div><button id="busSwap" class="swap-button" type="button" aria-label="출발·도착 바꾸기">⇄</button><div class="station-box"><label for="busTo"><span class="route-dot to"></span>도착 터미널</label><input id="busTo" type="search" placeholder="도착지 검색" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="terminalSuggestions" required /></div></div>
-    <div id="terminalSuggestions" class="suggestions" role="listbox" hidden></div>
+    <div id="terminalSuggestions" class="suggestions" role="listbox" aria-label="터미널 검색 결과: 스크롤하면 전체 목록을 볼 수 있습니다" hidden></div>
     <div class="date-block"><div class="date-head"><label for="busDate">가는 날짜</label><span id="busDateHint">출발일 기준</span></div><div class="date-row"><input id="busDate" type="date" required/><div class="date-buttons"><button id="busToday" type="button">오늘</button><button id="busTomorrow" type="button">내일</button></div></div><p id="dateWarning" class="bus-date-warning" hidden>시외버스는 현재 공공데이터에서 당일 배차만 제공하므로 오늘 날짜만 조회할 수 있습니다.</p></div>
     <button class="search-button" id="busSubmit" type="submit"><span>버스 시간표 검색하기</span><span aria-hidden="true">→</span></button>
    </form>
