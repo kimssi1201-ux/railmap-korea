@@ -42,7 +42,7 @@ export async function onRequestGet({env,request}){
   for(let i=0;i<pairs.length;i+=3){
    // Cap concurrent TAGO requests to protect the public API rate limit.
    const batch=await Promise.allSettled(pairs.slice(i,i+3).map(([from,to])=>
-     cachedBusPair({cache,requestUrl:request.url,type,from,to,date,load:()=>callBus(env,type,conf.scheduleOp,{depTerminalId:from,arrTerminalId:to,depPlandTime:date.replaceAll('-',''),numOfRows:300,pageNo:1})}))
+     cachedBusPair({cache,requestUrl:request.url,type,from,to,date,load:()=>callBus(env,type,conf.scheduleOp,{depTerminalId:from,arrTerminalId:to,depPlandTime:date.replaceAll('-',''),numOfRows:300,pageNo:1})})
    ));
    for(const item of batch){
     if(item.status==='rejected'){failures++;lastError=item.reason;partial=true;continue}
