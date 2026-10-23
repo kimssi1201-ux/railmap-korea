@@ -38,6 +38,16 @@ export function destinationCandidates(departure,stations,limit=18){
  }
  return [...rank].sort((a,b)=>a[1]-b[1]||a[0].localeCompare(b[0],'ko')).slice(0,Math.max(0,Math.min(24,limit))).map(([name])=>official.get(name));
 }
+// A user-selected route should be verified before the other suggested candidates.
+export function prioritizeDestinationCandidates(candidates,preferred,departureId,limit=18){
+ const list=Array.isArray(candidates)?candidates:[];
+ const ordered=preferred?.id&&preferred.id!==departureId?[preferred,...list]:list;
+ const seen=new Set();
+ return ordered.filter(station=>{
+  if(!station?.id||station.id===departureId||seen.has(station.id))return false;
+  seen.add(station.id);return true;
+ }).slice(0,Math.max(0,limit));
+}
 export function verifiedDestinationResponse(data,grade='전체'){
  if(!data?.ok||!Array.isArray(data.trains))return {state:'error',count:0};
  const valid=data.trains.filter(t=>t&&/^\d{12,14}$/.test(String(t.depTime))&&/^\d{12,14}$/.test(String(t.arrTime)));
