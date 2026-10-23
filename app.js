@@ -24,11 +24,12 @@ function dateInit(){ui.tripDate.min=localDate();ui.tripDate.max=localDate(31);ui
 function quickRoutes(){ui.quickRoutes.replaceChildren();const allPairs=[...state.recent,...SHORTCUTS].filter((r,i,a)=>a.findIndex(x=>x[0]===r[0]&&x[1]===r[1])===i);const pairs=(state.connected?allPairs.filter(([a,b])=>findStation(a)&&findStation(b)):allPairs).slice(0,7);pairs.forEach(([from,to])=>{const b=document.createElement('button');b.type='button';b.append(text('strong',from),text('span','→'),text('strong',to));b.addEventListener('click',()=>{ui.fromInput.value=from;ui.toInput.value=to;state.selected.from=findStation(from);state.selected.to=findStation(to);closeSuggestions();document.activeElement?.blur();if(state.connected&&state.selected.from)refreshDestinations({keepTo:true});if(state.connected&&(!state.selected.from||!state.selected.to)){notice('해당 구간의 역 코드가 공식 목록에 없어 조회할 수 없습니다. 다른 구간을 선택해 주세요.','error');return}notice(state.connected?'출발역과 도착역이 선택됐어요. 날짜를 확인한 뒤 검색하세요.':'역 정보 연결을 확인하는 중입니다.');ui.searchBtn.scrollIntoView({block:'nearest',inline:'nearest',behavior:'smooth'})});ui.quickRoutes.append(b)});ui.clearRecentBtn.hidden=!state.recent.length}
 async function loadStations(){setStatus('역 정보 연결 중');try{const response=await fetch('/api/stations?v=seoul-v7',{cache:'no-store',headers:{Accept:'application/json'}});const body=await response.json();if(!response.ok||!body.ok||!Array.isArray(body.stations))throw new Error(body.error||'역 목록 조회에 실패했습니다.');state.stations=ensureMajorStations(body.stations.filter(s=>s&&typeof s.name==='string'&&typeof s.id==='string'));if(!state.stations.length)throw new Error('조회 가능한 역이 없습니다.');state.connected=true;setStatus(`전국 역 ${state.stations.length}개 연결`,'ok');if(body.partial)notice('일부 지역 역 정보가 누락되어 주요 역 코드를 보완했습니다. 운행정보는 검색 시 공식 API로 확인합니다.');quickRoutes();if(ui.suggestions.hidden===false&&state.active)showSuggestions(state.active);for(const side of ['from','to'])tryResolve(side);if(state.selected.from)refreshDestinations()}catch(error){state.connected=false;setStatus('시간표 연결 확인 필요','error');notice((error.message||'역 목록 조회 오류')+' Cloudflare의 TAGO_API_KEY 및 API 활용 승인 상태를 확인해 주세요.','error');closeSuggestions()}}
 
+let activeDestinationController=null;
 function destStatus(message){ui.destinationStatus.textContent=message}
 function changeDestinationMode(){
  const all=state.destinationMode==='verified';
  state.destinationMode=all?'all':'verified';
- state.destinationSeq++;state.destinationLoading=false;state.destinationItems=[];
+ activeDestinationController?.abort();state.destinationSeq++;state.destinationLoading=false;state.destinationItems=[];
  state.selected.to=null;ui.toInput.value='';closeSuggestions();
  ui.destinationModeToggle.textContent=all?'확인된 직통역만 보기':'전체 역에서 직접 검색';
  refreshDestinations();
@@ -36,6 +37,7 @@ function changeDestinationMode(){
 async function refreshDestinations({keepTo=false}={}){
  const origin=state.selected.from,oldTo=keepTo?state.selected.to:null;
  const current=++state.destinationSeq;
+ activeDestinationController?.abort();
  state.destinationItems=[];state.destinationLoading=false;
  state.selected.to=null;ui.toInput.value='';
  if(state.destinationMode==='all'){
@@ -55,20 +57,23 @@ async function refreshDestinations({keepTo=false}={}){
  const date=ui.tripDate.value,grade=state.filter;
  if(!stations.length){destStatus('이 역은 자동 확인 가능한 목적지 후보가 없습니다. 전국 역에서 직접 검색해 주세요.');return}
  state.destinationLoading=true;
+ const controller=new AbortController();activeDestinationController=controller;
+ const limitTimer=setTimeout(()=>controller.abort(),14000);
  destStatus(origin.name+'역 · '+date+' · 직통 후보 '+stations.length+'곳의 공식 시간표 확인 중…');
  let done=0,failed=0;
  for(let i=0;i<stations.length;i+=3){
+  if(controller.signal.aborted)break;
   const batch=stations.slice(i,i+3);
   const responses=await Promise.all(batch.map(async station=>{
    try{
     const url=new URL('/api/trains',location.origin);
     for(const [key,value] of Object.entries({from:origin.id,to:station.id,date}))url.searchParams.set(key,value);
-    const response=await fetch(url.toString(),{headers:{Accept:'application/json'}});
+    const response=await fetch(url.toString(),{headers:{Accept:'application/json'},signal:controller.signal});
     const body=await response.json();
     return {station,result:response.ok?verifiedDestinationResponse(body,grade):{state:'error',count:0}};
    }catch{return {station,result:{state:'error',count:0}}}
   }));
-  if(current!==state.destinationSeq)return;
+  if(current!==state.destinationSeq){clearTimeout(limitTimer);return;}
   done+=batch.length;
   for(const {station,result} of responses){
    if(result.state==='confirmed')state.destinationItems.push(station);
@@ -80,7 +85,8 @@ async function refreshDestinations({keepTo=false}={}){
   destStatus(done+'/'+stations.length+'곳 확인 · 직통 '+state.destinationItems.length+'곳'+(failed?' · 일부 확인 실패':''));
   if(state.active==='to'&&!ui.suggestions.hidden)showSuggestions('to');
  }
- if(current!==state.destinationSeq)return;
+ if(current!==state.destinationSeq){clearTimeout(limitTimer);return;}
+ clearTimeout(limitTimer);
  state.destinationLoading=false;
  if(oldTo&&state.destinationItems.some(x=>x.id===oldTo.id)){state.selected.to=oldTo;ui.toInput.value=oldTo.name}
  if(!state.destinationItems.length)destStatus(failed?'공식 API 연결에 실패한 후보가 있습니다. 전국 검색 또는 다른 날짜를 이용해 주세요.':'해당 날짜에 확인된 직통 목적지가 없습니다. 다른 날짜를 선택하거나 전국 검색을 이용해 주세요.');
