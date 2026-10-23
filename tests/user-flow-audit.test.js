@@ -28,3 +28,13 @@ test('train search keeps its accessible name without repeated visible heading',(
  assert.match(html,/id="serviceStatus"/);
  assert.match(read('styles.css'),/\.card-head-compact\{justify-content:flex-end;margin-bottom:9px\}/);
 });
+
+test('nationwide train search hides the redundant explanation panel while keeping form controls',()=>{
+ const html=read('index.html');
+ assert.match(html,/<div class="destination-match-info" hidden>/);
+ assert.match(html,/id="fromInput"/);
+ assert.match(html,/id="toInput"/);
+ assert.match(html,/id="tripDate"/);
+ assert.match(html,/id="serviceStatus"/);
+ assert.match(read('app.js'),/destinationMode:'all'/);
+});

@@ -48,3 +48,6 @@
 /* Keep the form accessible while removing its repetitive visible heading. */
 .card-head-compact{justify-content:flex-end;margin-bottom:9px}
 .card-head-compact .service-status{max-width:100%}
+
+/* Nationwide station lookup is the default. Hide optional explanation/mode controls. */
+.search-card .destination-match-info[hidden] + .date-block{margin-top:15px}
