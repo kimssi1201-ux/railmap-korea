@@ -6,7 +6,7 @@ import {stationPickerMatches,destinationPickerMatches,stationPickerRegions} from
 import {matchesTrainFilter} from './train-types.js';
 'use strict';
 const $=id=>document.getElementById(id);
-const ui=Object.fromEntries(['searchForm','fromInput','toInput','swapBtn','suggestions','tripDate','todayBtn','tomorrowBtn','typeFilters','searchBtn','serviceStatus','notice','quickRoutes','clearRecentBtn','resultsSection','resultsTitle','resultCount','resultToolbar','sortSelect','results','boardingHelp','boardingDialog','boardingClose','boardingContent','helpOpen','helpDialog','helpClose','destinationStatus','destinationModeToggle','destinationMore'].map(id=>[id,$(id)]));
+const ui=Object.fromEntries(['searchForm','fromInput','toInput','swapBtn','suggestions','tripDate','todayBtn','tomorrowBtn','typeFilters','searchBtn','serviceStatus','notice','quickRoutes','clearRecentBtn','resultsSection','resultsTitle','resultCount','resultToolbar','sortSelect','results','boardingHelp','boardingDialog','boardingClose','boardingContent','helpOpen','helpDialog','helpClose'].map(id=>[id,$(id)]));
 const SHORTCUTS=[['서울','부산'],['수서','부산'],['용산','목포'],['청량리','강릉'],['서울','대전']];
 const state={stations:[],connected:false,selected:{from:null,to:null},active:null,filter:'전체',sort:'departure',trains:[],lastQuery:null,partial:false,recent:readRecent(),requestSeq:0,destinationMode:'all',destinationItems:[],destinationSeq:0,destinationLoading:false,pickerSide:null,pickerRegion:''};
 const norm=normalizeName;
