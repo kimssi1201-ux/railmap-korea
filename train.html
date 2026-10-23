@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#ffffff" />
+  <meta name="description" content="레일맵에서 KTX·SRT 기차 시간표, 고속·시외버스 배차, 지역별 시내버스 도착정보를 간편하게 찾아보세요." />
+  <title>전국 기차 시간표 검색 · KTX·SRT·일반열차 | 레일맵</title>
+  <link rel="canonical" href="https://railmap-korea.pages.dev/train.html" />
+  <link rel="stylesheet" href="./styles.css?v=remove-destination-panel-v3" />
+  <link rel="stylesheet" href="./bus.css?v=noempty-v2" />
+  <link rel="stylesheet" href="./station-pages.css?v=station-guide-v1" />
+  <script type="module" src="./app.js?v=remove-destination-panel-v3"></script>
+</head>
+<body>
+  <div class="app">
+    <header class="site-header">
+      <a href="/" class="logo" aria-label="레일맵 홈"><span class="logo-icon" aria-hidden="true">🚆</span><span>RAIL<span>MAP</span></span></a>
+      <button id="helpOpen" class="help-button" type="button" aria-label="이용 안내 보기">이용 안내 <span aria-hidden="true">ⓘ</span></button>
+    </header>
+
+    <main class="content">
+      <nav class="transport-tabs" aria-label="교통수단 선택"><a href="/train.html" aria-current="page">🚆 기차</a><a href="/bus.html?type=express">🚌 고속</a><a href="/bus.html?type=intercity">🚍 시외</a><a href="/citybus.html">🚏 시내</a></nav>
+      <section class="hero hero-banner" aria-labelledby="pageTitle">
+        <h1 id="pageTitle" class="sr-only">레일맵 - 전국 열차 시간표 간편 검색</h1>
+        <picture>
+          <source media="(max-width: 680px)" srcset="./assets/railmap-banner-mobile.webp" type="image/webp" />
+          <img src="./assets/railmap-banner-wide.webp" alt="열차 일러스트와 레일맵 안내: 코레일 들어가지 않고 빠르게 열차 찾기" width="1152" height="161" decoding="async" fetchpriority="high" />
+        </picture>
+      </section>
+
+      <section class="search-card" aria-labelledby="searchTitle">
+        <div class="card-head card-head-compact"><h2 id="searchTitle" class="sr-only">열차 검색</h2><span id="serviceStatus" class="service-status" role="status">역 정보 연결 중</span></div>
+        <form id="searchForm" autocomplete="off">
+          <div class="station-fields">
+            <div class="station-box" id="fromBox">
+              <label for="fromInput"><span class="route-dot from"></span>출발역</label>
+              <input type="search" id="fromInput" placeholder="어디에서 타세요?" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="suggestions" autocapitalize="off" required />
+            </div>
+            <button type="button" id="swapBtn" class="swap-button" title="출발역과 도착역 바꾸기" aria-label="출발역과 도착역 바꾸기">⇄</button>
+            <div class="station-box" id="toBox">
+              <label for="toInput"><span class="route-dot to"></span>도착역</label>
+              <input type="search" id="toInput" placeholder="어디로 가세요?" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="suggestions" autocapitalize="off" required />
+            </div>
+          </div>
+          <div id="suggestions" class="suggestions" role="listbox" hidden></div>
+          <div class="date-block">
+            <div class="date-head"><label for="tripDate">가는 날짜</label><span>출발일 기준</span></div>
+            <div class="date-row"><input id="tripDate" type="date" required /><div class="date-buttons"><button id="todayBtn" type="button">오늘</button><button id="tomorrowBtn" type="button">내일</button></div></div>
+          </div>
+          <fieldset class="type-fieldset"><legend>열차 종류</legend><div class="type-chips" id="typeFilters">
+            <button type="button" class="chip active" data-grade="전체" aria-pressed="true">전체</button>
+            <button type="button" class="chip" data-grade="KTX" aria-pressed="false">KTX</button>
+            <button type="button" class="chip" data-grade="SRT" aria-pressed="false">SRT</button>
+            <button type="button" class="chip" data-grade="일반" aria-pressed="false">ITX·일반</button>
+          </div></fieldset>
+          <button id="searchBtn" type="submit" class="search-button"><span>열차 시간표 검색하기</span><span aria-hidden="true">→</span></button>
+        </form>
+        <p id="notice" class="notice" role="status" aria-live="polite"></p>
+      </section>
+
+      <section class="quick-routes" aria-labelledby="popularTitle">
+        <div class="section-title"><h2 id="popularTitle">자주 찾는 구간</h2><button id="clearRecentBtn" class="text-button" type="button" hidden>최근 기록 지우기</button></div>
+        <div id="quickRoutes" class="route-chips"></div>
+      </section>
+
+      <section class="sp-card" aria-labelledby="featuredStationsTitle" style="margin-top:18px"><div class="section-title"><h2 id="featuredStationsTitle">전국 기차역 찾기</h2><a class="sp-secondary-link" href="/stations/">17개 시·도 전체보기 →</a></div><p>17개 시·도에서 원하는 역을 찾아 상세정보와 날짜별 공식 시간표를 확인하세요.</p><div class="sp-link-list"><a class="sp-link" href="/stations/NAT010000"><strong>서울역</strong><small>주요 목적지·시간표</small><span aria-hidden="true">→</span></a><a class="sp-link" href="/stations/NAT014445"><strong>부산역</strong><small>주요 목적지·시간표</small><span aria-hidden="true">→</span></a><a class="sp-link" href="/stations/NATH30000"><strong>수서역</strong><small>주요 목적지·시간표</small><span aria-hidden="true">→</span></a></div></section>
+
+      <section id="resultsSection" class="results-section" aria-labelledby="resultsTitle">
+        <div class="section-title"><div><span class="eyebrow-small">TRAIN SCHEDULE</span><h2 id="resultsTitle">열차 검색 결과</h2></div><span id="resultCount" class="result-count">—</span></div>
+        <div id="resultToolbar" class="result-toolbar" hidden><label for="sortSelect">정렬</label><select id="sortSelect"><option value="departure">출발 빠른 순</option><option value="duration">소요시간 짧은 순</option><option value="fare">요금 낮은 순</option></select></div>
+        <div id="results" class="result-list"><div class="empty-state"><span aria-hidden="true">🚆</span><strong>가고 싶은 곳을 검색해 보세요</strong><p>실제 열차 시간표를 확인하고 비교할 수 있어요.</p></div></div>
+      </section>
+
+      <section class="boarding-guide" aria-label="승강장 찾는 방법">
+        <span class="guide-icon" aria-hidden="true">🚉</span>
+        <div><strong>몇 번 승강장에서 타나요?</strong><p>열차번호와 현장 전광판으로 타는 곳을 확인하세요.</p></div>
+        <button id="boardingHelp" type="button" aria-label="타는 곳 안내 열기">안내 보기 <span aria-hidden="true">›</span></button>
+      </section>
+      <div class="source-note">운행정보 출처: 국토교통부 TAGO · 실제 좌석 상황, 열차 지연과 당일 승강장 번호는 제공되지 않습니다.</div>
+    </main>
+    <footer class="footer"><span>© RAILMAP</span><div><a href="https://www.data.go.kr/data/15098552/openapi.do" target="_blank" rel="noopener noreferrer">데이터 출처 ↗</a><a href="https://www.korail.com/" target="_blank" rel="noopener noreferrer">코레일 ↗</a><a href="https://etk.srail.kr/" target="_blank" rel="noopener noreferrer">SRT ↗</a></div></footer>
+  </div>
+
+  <dialog id="boardingDialog" class="dialog"><div class="dialog-head"><strong>🚉 타는 곳 안내</strong><button type="button" id="boardingClose" aria-label="안내 닫기">×</button></div><div id="boardingContent"></div></dialog>
+  <dialog id="helpDialog" class="dialog"><div class="dialog-head"><strong>레일맵 이용 안내</strong><button type="button" id="helpClose" aria-label="이용 안내 닫기">×</button></div><p>출발역·도착역·날짜를 입력하면 국토교통부 TAGO가 제공하는 열차 운행정보를 조회합니다.</p><p>KTX·SRT·일반열차를 필터로 비교하고, 예매는 해당 운영사의 공식 사이트에서 진행합니다.</p><p>실시간 좌석 현황, 지연 정보 및 열차별 승강장 번호는 제공하지 않습니다. 출발 전 역 전광판을 확인해 주세요.</p></dialog>
+</body>
+</html>
