@@ -34,3 +34,13 @@
 .destination-match-info{display:flex;flex-wrap:wrap;align-items:center;gap:7px 12px;margin:9px 0 2px;padding:10px 12px;border:1px solid #dce8f5;background:#f5f9ff;border-radius:11px}
 .destination-match-info p{flex:1 1 210px;font-size:11px;line-height:1.55;color:#516f90;margin:0}
 .destination-match-info button{background:#e4efff;border:1px solid #b7d0f4;color:#2469b0;font-weight:800;font-size:11px;padding:9px 11px;border-radius:9px}
+
+/* The origin picker shows ALL official railway stations, rather than a 12-item slice. */
+.suggestions{max-height:min(56vh,440px);overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+.station-picker-head{position:sticky;top:0;z-index:2;padding:10px 12px;background:#f5f9ff;border-bottom:1px solid #dce8f6;display:flex;flex-direction:column;gap:8px}
+.station-picker-count{color:#234e78;font-weight:800;font-size:12px}
+.station-picker-region{border:1px solid #c8d8ea;border-radius:9px;background:#fff;color:#26435f;padding:10px 12px;font-size:15px;font-weight:700;min-height:42px;width:100%}
+.station-picker-verified{padding:10px 12px;background:#f5f9ff;color:#476685;font-size:12px;font-weight:700}
+.suggestions button[role=option]{min-height:50px;gap:8px}
+.suggestions button[role=option] small{flex:none;font-size:11px}
+.station-picker-foot{position:sticky;bottom:0;z-index:2;padding:10px 12px;border-top:1px solid #dce8f6;background:#eaf3ff;color:#376493;font-size:11px;line-height:1.5;font-weight:700}

@@ -1,13 +1,14 @@
 import {destinationCandidates,verifiedDestinationResponse} from './train-destinations.js';
 import {hasConfirmedSchedule} from './result-visibility.js';
 import {renderTrainTimetable} from './timetable-view.js';
-import {normalizeName,ensureMajorStations,getStation,searchStations} from './station-utils.js';
+import {normalizeName,ensureMajorStations,getStation} from './station-utils.js';
+import {stationPickerMatches,stationPickerRegions} from './station-picker.js';
 import {matchesTrainFilter} from './train-types.js';
 'use strict';
 const $=id=>document.getElementById(id);
 const ui=Object.fromEntries(['searchForm','fromInput','toInput','swapBtn','suggestions','tripDate','todayBtn','tomorrowBtn','typeFilters','searchBtn','serviceStatus','notice','quickRoutes','clearRecentBtn','resultsSection','resultsTitle','resultCount','resultToolbar','sortSelect','results','boardingHelp','boardingDialog','boardingClose','boardingContent','helpOpen','helpDialog','helpClose','destinationStatus','destinationModeToggle'].map(id=>[id,$(id)]));
 const SHORTCUTS=[['서울','부산'],['수서','부산'],['용산','목포'],['청량리','강릉'],['서울','대전']];
-const state={stations:[],connected:false,selected:{from:null,to:null},active:null,filter:'전체',sort:'departure',trains:[],lastQuery:null,partial:false,recent:readRecent(),requestSeq:0,destinationMode:'verified',destinationItems:[],destinationSeq:0,destinationLoading:false};
+const state={stations:[],connected:false,selected:{from:null,to:null},active:null,filter:'전체',sort:'departure',trains:[],lastQuery:null,partial:false,recent:readRecent(),requestSeq:0,destinationMode:'verified',destinationItems:[],destinationSeq:0,destinationLoading:false,pickerSide:null,pickerRegion:''};
 const norm=normalizeName;
 function readRecent(){try{const rows=JSON.parse(localStorage.getItem('railmap_recent_v5')||'[]');return Array.isArray(rows)?rows.filter(r=>Array.isArray(r)&&r.length===2&&r.every(x=>typeof x==='string')).slice(0,4):[]}catch{return []}}
 function saveRecent(){try{localStorage.setItem('railmap_recent_v5',JSON.stringify(state.recent))}catch{}}
@@ -17,7 +18,50 @@ function setStatus(label,kind=''){ui.serviceStatus.textContent=label;ui.serviceS
 function text(tag,value,className){const n=document.createElement(tag);if(className)n.className=className;n.textContent=value;return n}
 function findStation(name){return getStation(state.stations,name)}
 function closeSuggestions(){ui.suggestions.hidden=true;ui.fromInput.setAttribute('aria-expanded','false');ui.toInput.setAttribute('aria-expanded','false')}
-function showSuggestions(side){state.active=side;const input=side==='from'?ui.fromInput:ui.toInput;const q=norm(input.value);const pool=side==='to'&&state.destinationMode==='verified'?state.destinationItems:state.stations;const hits=searchStations(pool,q,12);ui.suggestions.replaceChildren();if(!state.connected){ui.suggestions.append(text('div','공식 역 목록을 불러오는 중입니다.','no-match'));}else if(hits.length===0){ui.suggestions.append(text('div',side==='to'&&state.destinationMode==='verified'?(state.destinationLoading?'공식 열차 시간표로 직통 목적지를 확인 중입니다.':'확인된 목적지가 없습니다. 다른 날짜를 선택하거나 전국 검색을 이용해 주세요.'):'목록에서 역을 찾지 못했습니다. 다른 역명을 입력해 주세요.','no-match'));}else {for(const s of hits){const b=document.createElement('button');b.type='button';b.setAttribute('role','option');b.append(text('strong',s.name+'역'));b.addEventListener('click',()=>selectStation(side,s));ui.suggestions.append(b)}}ui.suggestions.hidden=false;input.setAttribute('aria-expanded','true')}
+function showSuggestions(side){
+ const input=side==='from'?ui.fromInput:ui.toInput;
+ if(state.pickerSide!==side){state.pickerSide=side;state.pickerRegion=''}
+ state.active=side;
+ const pool=side==='to'&&state.destinationMode==='verified'?state.destinationItems:state.stations;
+ const canBrowseRegions=side==='from'||state.destinationMode==='all';
+ const region=canBrowseRegions?state.pickerRegion:'';
+ const hits=stationPickerMatches(pool,input.value,region);
+ ui.suggestions.replaceChildren();
+ if(canBrowseRegions){
+  const head=text('div','','station-picker-head');
+  const total=pool.length;
+  const count=text('strong','전체 '+total+'개 역 · '+hits.length+'개 표시','station-picker-count');
+  const select=document.createElement('select');select.className='station-picker-region';
+  select.setAttribute('aria-label','역을 찾을 시·도 선택');
+  select.append(new Option('모든 지역 · '+total+'개',''));
+  for(const {region:regionName,count:regionCount} of stationPickerRegions(pool)){
+   select.append(new Option(regionName+' · '+regionCount+'개',regionName));
+  }
+  select.value=region;
+  select.addEventListener('change',()=>{state.pickerRegion=select.value;showSuggestions(side)});
+  head.append(count,select);ui.suggestions.append(head);
+ }else{
+  ui.suggestions.append(text('div','선택한 날짜에 확인된 직통 목적지 '+hits.length+'개','station-picker-verified'));
+ }
+ if(!state.connected){
+  ui.suggestions.append(text('div','공식 역 목록을 불러오는 중입니다.','no-match'));
+ }else if(!hits.length){
+  ui.suggestions.append(text('div',side==='to'&&state.destinationMode==='verified'?(state.destinationLoading?'공식 시간표로 직통 도착역을 확인 중입니다.':'확인된 직통 도착역이 없습니다. 다른 날짜나 전국 검색을 이용해 주세요.'):'일치하는 역이 없습니다. 지역을 바꾸거나 역 이름을 검색해 주세요.','no-match'));
+ }else{
+  for(const station of hits){
+   const button=document.createElement('button');button.type='button';
+   button.setAttribute('role','option');
+   button.append(text('strong',station.name.endsWith('역')?station.name:station.name+'역'));
+   if(canBrowseRegions)button.append(text('small',station.region||'지역 미분류'));
+   button.addEventListener('click',()=>selectStation(side,station));
+   ui.suggestions.append(button);
+  }
+ }
+ if(canBrowseRegions&&hits.length>4)ui.suggestions.append(text('div','↓ 목록을 아래로 스크롤하면 나머지 역도 볼 수 있어요. 역 이름을 입력하면 더 빠릅니다.','station-picker-foot'));
+ ui.suggestions.scrollTop=0;
+ ui.suggestions.hidden=false;
+ input.setAttribute('aria-expanded','true');
+}
 function selectStation(side,station){state.selected[side]=station;const input=side==='from'?ui.fromInput:ui.toInput;input.value=station.name;closeSuggestions();input.blur();if(side==='from')refreshDestinations()}
 function tryResolve(side){const input=side==='from'?ui.fromInput:ui.toInput;const selected=state.selected[side];if(selected&&norm(selected.name)===norm(input.value))return selected;const matching=side==='to'&&state.destinationMode==='verified'?getStation(state.destinationItems,input.value):findStation(input.value);if(matching){state.selected[side]=matching;input.value=matching.name;return matching}return null}
 function dateInit(){ui.tripDate.min=localDate();ui.tripDate.max=localDate(31);ui.tripDate.value=localDate()}
@@ -114,5 +158,5 @@ function renderResults(){
 }
 async function submitSearch(e){e.preventDefault();closeSuggestions();if(!state.connected){notice('열차정보 API가 연결되지 않았습니다. 아래 오류 안내를 확인해 주세요.','error');return}const from=tryResolve('from'),to=tryResolve('to');if(!from){notice('목록에서 정확한 출발역을 선택해 주세요.','error');ui.fromInput.focus();return}if(!to){notice('목록에서 정확한 도착역을 선택해 주세요.','error');ui.toInput.focus();return}if(from.id===to.id){notice('출발역과 도착역을 다르게 선택해 주세요.','error');return}const date=ui.tripDate.value;if(!date||date<localDate()||date>localDate(31)){notice('오늘부터 31일 이내 날짜를 선택해 주세요.','error');return}const seq=++state.requestSeq;ui.searchBtn.disabled=true;ui.searchBtn.querySelector('span').textContent='공식 시간표 조회 중…';notice('');ui.resultsSection.hidden=false;emptyResults('운행시간표를 확인하는 중입니다.','공공데이터 조회 상황에 따라 조금 걸릴 수 있어요.','⏳');ui.resultsSection.scrollIntoView({block:'start',inline:'nearest',behavior:'smooth'});try{const url=new URL('/api/trains',location.origin);url.searchParams.set('from',from.id);url.searchParams.set('to',to.id);url.searchParams.set('date',date);const response=await fetch(url.toString());const body=await response.json();if(seq!==state.requestSeq)return;if(!response.ok||!body.ok)throw new Error(body.error||'열차를 조회할 수 없습니다.');state.trains=Array.isArray(body.trains)?body.trains:[];state.partial=!!body.partial;state.lastQuery={from:from.name,to:to.name,date};state.recent=[[from.name,to.name],...state.recent.filter(r=>r[0]!==from.name||r[1]!==to.name)].slice(0,4);saveRecent();quickRoutes();renderResults();if(state.trains.length)notice(body.partial?`${date} · 공식 시간표의 일부만 조회됐습니다. 예매처에서도 확인해 주세요.`:`${date} · ${from.name} → ${to.name} 공공데이터 조회 완료.`,body.partial?'':'ok')}catch(error){if(seq!==state.requestSeq)return;state.trains=[];state.lastQuery=null;ui.resultsSection.hidden=true;ui.resultCount.textContent='—';notice((error.message||'공공데이터를 불러오지 못했습니다.')+' · 공식 예매처에서도 확인해 주세요.','error')}finally{if(seq===state.requestSeq){ui.searchBtn.disabled=false;ui.searchBtn.querySelector('span').textContent='열차 시간표 검색하기'}}}
 function openBoarding(row=null){const station=row?.fromName||state.lastQuery?.from||state.selected.from?.name||'출발역';const train=row?.trainNo?` · 열차 ${row.trainNo}`:'';ui.boardingContent.replaceChildren();ui.boardingContent.append(text('div',station+'역'+train+' · 타는 곳 현장 확인 필요','boarding-summary'));const steps=document.createElement('ol');steps.className='boarding-steps';for(const s of ['역 대합실의 출발 전광판으로 이동합니다.','출발시간과 열차번호, 행선지가 일치하는지 확인합니다.','전광판에 나온 타는 곳(승강장) 번호를 확인하고 이동합니다.','승차권의 호차와 좌석을 확인한 후 승차합니다.'])steps.append(text('li',s));ui.boardingContent.append(steps,text('p','열차별 승강장은 운행 당일 변경될 수 있습니다. 공식 승강장 번호가 제공되지 않으므로 임의 번호를 표시하지 않습니다.','board-warning'));const anchor=document.createElement('a');anchor.href='https://www.korail.com/';anchor.target='_blank';anchor.rel='noopener noreferrer';anchor.className='board-link';anchor.textContent='코레일 공식 안내 ↗';ui.boardingContent.append(anchor);ui.boardingDialog.showModal()}
-function bind(){for(const side of ['from','to']){const input=side==='from'?ui.fromInput:ui.toInput;input.addEventListener('focus',()=>showSuggestions(side));input.addEventListener('input',()=>{state.selected[side]=null;if(side==='from'){state.destinationSeq++;state.destinationItems=[];state.selected.to=null;ui.toInput.value='';ui.toInput.disabled=true;destStatus('출발역을 선택한 후 직통 목적지를 확인합니다.')}showSuggestions(side)});input.addEventListener('keydown',e=>{if(e.key==='Escape')closeSuggestions();if(e.key==='Enter'&&!ui.suggestions.hidden){const first=ui.suggestions.querySelector('button');if(first){e.preventDefault();first.click()}}})}document.addEventListener('pointerdown',e=>{if(!e.target.closest('.station-fields')&&!e.target.closest('#suggestions'))closeSuggestions()});ui.swapBtn.addEventListener('click',()=>{const a=ui.fromInput.value;ui.fromInput.value=ui.toInput.value;ui.toInput.value=a;const p=state.selected.from;state.selected.from=state.selected.to;state.selected.to=p;closeSuggestions();if(state.selected.from)refreshDestinations({keepTo:true});else refreshDestinations()});ui.todayBtn.addEventListener('click',()=>{ui.tripDate.value=localDate();refreshDestinations()});ui.tomorrowBtn.addEventListener('click',()=>{ui.tripDate.value=localDate(1);refreshDestinations()});ui.typeFilters.addEventListener('click',e=>{const btn=e.target.closest('[data-grade]');if(!btn)return;state.filter=btn.dataset.grade;ui.typeFilters.querySelectorAll('button').forEach(n=>{n.classList.toggle('active',n===btn);n.setAttribute('aria-pressed',String(n===btn))});renderResults();refreshDestinations()});ui.searchForm.addEventListener('submit',submitSearch);ui.sortSelect.addEventListener('change',()=>{state.sort=ui.sortSelect.value;renderResults()});ui.clearRecentBtn.addEventListener('click',()=>{state.recent=[];saveRecent();quickRoutes()});ui.boardingHelp.addEventListener('click',()=>openBoarding());ui.boardingClose.addEventListener('click',()=>ui.boardingDialog.close());ui.helpOpen.addEventListener('click',()=>ui.helpDialog.showModal());ui.helpClose.addEventListener('click',()=>ui.helpDialog.close());ui.tripDate.addEventListener('change',()=>refreshDestinations());ui.destinationModeToggle.addEventListener('click',changeDestinationMode);}
+function bind(){for(const side of ['from','to']){const input=side==='from'?ui.fromInput:ui.toInput;input.addEventListener('focus',()=>showSuggestions(side));input.addEventListener('input',()=>{state.pickerRegion='';state.selected[side]=null;if(side==='from'){state.destinationSeq++;state.destinationItems=[];state.selected.to=null;ui.toInput.value='';ui.toInput.disabled=true;destStatus('출발역을 선택한 후 직통 목적지를 확인합니다.')}showSuggestions(side)});input.addEventListener('keydown',e=>{if(e.key==='Escape')closeSuggestions();if(e.key==='Enter'&&!ui.suggestions.hidden){const first=ui.suggestions.querySelector('button');if(first){e.preventDefault();first.click()}}})}document.addEventListener('pointerdown',e=>{if(!e.target.closest('.station-fields')&&!e.target.closest('#suggestions'))closeSuggestions()});ui.swapBtn.addEventListener('click',()=>{const a=ui.fromInput.value;ui.fromInput.value=ui.toInput.value;ui.toInput.value=a;const p=state.selected.from;state.selected.from=state.selected.to;state.selected.to=p;closeSuggestions();if(state.selected.from)refreshDestinations({keepTo:true});else refreshDestinations()});ui.todayBtn.addEventListener('click',()=>{ui.tripDate.value=localDate();refreshDestinations()});ui.tomorrowBtn.addEventListener('click',()=>{ui.tripDate.value=localDate(1);refreshDestinations()});ui.typeFilters.addEventListener('click',e=>{const btn=e.target.closest('[data-grade]');if(!btn)return;state.filter=btn.dataset.grade;ui.typeFilters.querySelectorAll('button').forEach(n=>{n.classList.toggle('active',n===btn);n.setAttribute('aria-pressed',String(n===btn))});renderResults();refreshDestinations()});ui.searchForm.addEventListener('submit',submitSearch);ui.sortSelect.addEventListener('change',()=>{state.sort=ui.sortSelect.value;renderResults()});ui.clearRecentBtn.addEventListener('click',()=>{state.recent=[];saveRecent();quickRoutes()});ui.boardingHelp.addEventListener('click',()=>openBoarding());ui.boardingClose.addEventListener('click',()=>ui.boardingDialog.close());ui.helpOpen.addEventListener('click',()=>ui.helpDialog.showModal());ui.helpClose.addEventListener('click',()=>ui.helpDialog.close());ui.tripDate.addEventListener('change',()=>refreshDestinations());ui.destinationModeToggle.addEventListener('click',changeDestinationMode);}
 dateInit();bind();ui.toInput.disabled=true;destStatus('출발역을 선택하면 직통 목적지를 확인합니다.');quickRoutes();renderResults();loadStations();
