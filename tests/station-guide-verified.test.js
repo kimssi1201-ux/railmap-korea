@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
 import {FEATURED_STATIONS,stationDetailHtml} from '../station-pages.js';
 
 test('every featured station displays one direct timetable search and no candidate expansion',()=>{
@@ -35,4 +36,13 @@ test('station destination input has visible options container for nationwide loo
  assert.match(html,/id="spDestinationOptions"/);
  assert.match(html,/limited-destination-picker-v3/);
  assert.ok(!html.includes('id="spLoadMoreRoutes"'));
+});
+
+test('station detail includes official dated 1-transfer fallback without showing invented routes',()=>{
+ const html=stationDetailHtml(FEATURED_STATIONS[0]);
+ assert.match(html,/rail-transfer-v1/);
+ const js=readFileSync(new URL('../station-destination.js',import.meta.url),'utf8');
+ assert.match(js,/searchOneTransfer/);
+ assert.match(js,/renderTransferCards/);
+ assert.match(js,/1회 환승편 조회 중/);
 });
