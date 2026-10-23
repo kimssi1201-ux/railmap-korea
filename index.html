@@ -6,10 +6,10 @@
   <meta name="theme-color" content="#ffffff" />
   <meta name="description" content="레일맵에서 KTX·SRT 기차 시간표, 고속·시외버스 배차, 지역별 시내버스 도착정보를 간편하게 찾아보세요." />
   <title>레일맵 RAILMAP | 기차 시간표 간편 검색</title>
-  <link rel="stylesheet" href="./styles.css?v=station-picker-all-v1" />
+  <link rel="stylesheet" href="./styles.css?v=destination-fast-v1" />
   <link rel="stylesheet" href="./bus.css?v=noempty-v2" />
   <link rel="stylesheet" href="./station-pages.css?v=station-guide-v1" />
-  <script type="module" src="./app.js?v=station-picker-all-v1"></script>
+  <script type="module" src="./app.js?v=destination-fast-v1"></script>
 </head>
 <body>
   <div class="app">
@@ -43,7 +43,7 @@
             </div>
           </div>
           <div id="suggestions" class="suggestions" role="listbox" hidden></div>
-          <div class="destination-match-info"><p id="destinationStatus" role="status" aria-live="polite">출발역을 선택하면 직통 목적지를 확인합니다.</p><button id="destinationModeToggle" type="button">전체 역에서 직접 검색</button></div>
+          <div class="destination-match-info"><p id="destinationStatus" role="status" aria-live="polite">출발역을 선택하면 직통 목적지를 확인합니다.</p><button id="destinationMore" type="button" hidden>다른 목적지 더 확인</button><button id="destinationModeToggle" type="button">전체 역에서 직접 검색</button></div>
           <div class="date-block">
             <div class="date-head"><label for="tripDate">가는 날짜</label><span>출발일 기준</span></div>
             <div class="date-row"><input id="tripDate" type="date" required /><div class="date-buttons"><button id="todayBtn" type="button">오늘</button><button id="tomorrowBtn" type="button">내일</button></div></div>
