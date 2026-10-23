@@ -1,5 +1,5 @@
 import {renderTrainTimetable} from './timetable-view.js';
-import {stationGuideCandidates,stationGuideSearch} from './station-destination-options.js';
+import {stationGuideOptions} from './station-destination-options.js';
 import {getStation,normalizeName} from './station-utils.js';
 
 const app=document.getElementById('spStationLookup');
@@ -35,20 +35,19 @@ if(app){
  }
  function suggest(){
   const query=input.value.trim();
-  const matches=query?stationGuideSearch(official,from,query,10):
-   stationGuideCandidates({id:from,name:fromName},[],official,12).slice(0,10);
+  const matches=stationGuideOptions({id:from,name:fromName},official,query);
   options.replaceChildren();
   if(!loaded){hideOptions();return;}
   if(!matches.length){
    const empty=document.createElement('div');empty.className='sp-station-options-empty';
-   empty.textContent=query?'등록된 역을 찾지 못했습니다. 역 이름을 확인해 주세요.':'도착역 이름을 입력해 주세요.';
+   empty.textContent=query?'일치하는 공식 역이 없습니다. 다른 역 이름을 입력해 주세요.':'조회 가능한 도착역이 없습니다.';
    options.append(empty);
   }else{
-   if(!query){
-    const hint=document.createElement('p');
-    hint.className='sp-station-options-hint';hint.textContent='참고 노선의 역 · 실제 직통 운행은 조회 후 확인';
-    options.append(hint);
-   }
+   const hint=document.createElement('p');
+   hint.className='sp-station-options-hint';
+   hint.textContent=query?'검색 결과 '+matches.length+'개 역 · 실제 직통 여부는 조회 후 확인':
+    '전국 등록 도착역 '+matches.length+'개 · 역을 선택하거나 이름으로 검색하세요';
+   options.append(hint);
    for(const station of matches){
     const button=document.createElement('button');button.type='button';button.setAttribute('role','option');
     const stationName=document.createElement('strong');stationName.textContent=label(station);
@@ -58,9 +57,10 @@ if(app){
     options.append(button);
    }
   }
-  options.hidden=false;input.setAttribute('aria-expanded','true');
+  options.hidden=false;options.scrollTop=0;input.setAttribute('aria-expanded','true');
  }
  input.addEventListener('focus',suggest);
+ input.addEventListener('click',suggest);
  input.addEventListener('input',()=>{
   chosen=null;resetResults();suggest();
  });

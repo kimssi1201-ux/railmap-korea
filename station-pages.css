@@ -67,3 +67,12 @@
 .sp-lookup .sp-external{margin-top:13px}
 .sp-lookup .sp-result-status:empty{display:none}
 @media(max-width:490px){.sp-lookup{padding:19px 16px}}
+
+/* iPhone: destination options stay in document flow and scroll independently. */
+.sp-lookup .sp-station-options{
+ position:relative;top:auto;left:auto;right:auto;z-index:auto;
+ margin-top:7px;max-height:min(34dvh,260px);overflow-y:auto;
+ border-radius:11px;box-shadow:0 2px 10px #1f3d6118;
+}
+.sp-lookup .sp-station-options-hint{position:sticky;top:0;z-index:1;background:#eaf3ff;font-weight:700}
+.sp-lookup .sp-station-options button{min-height:48px}
