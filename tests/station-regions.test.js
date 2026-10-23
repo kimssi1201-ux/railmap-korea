@@ -26,7 +26,7 @@ test('서버 캐시에 존재하는 비주요역도 상세페이지와 구간 �
   globalThis.caches={default:{match:async()=>new Response(JSON.stringify({ok:true,stations:[{id:'NAT123456',name:'검증역',region:'충북'},{id:'NAT010000',name:'서울',region:'서울'}],partial:false}))}};
   const args={env:{},request:new Request('https://railmap-korea.pages.dev/stations/NAT123456')};
   const s=await dynamicStation({...args,params:{id:'NAT123456'}});
-  assert.equal(s.status,200);assert.match(await s.text(),/검증역 시간표 안내/);
+  assert.equal(s.status,200);assert.match(await s.text(),/검증역 기차 시간표/);
   const r=await dynamicRoute({...args,params:{from:'NAT123456',to:'NAT010000'}});
   assert.equal(r.status,200);assert.match(await r.text(),/data-from="NAT123456"/);
   const unavailable=await dynamicStation({...args,params:{id:'NAT999999'}});assert.equal(unavailable.status,404);
