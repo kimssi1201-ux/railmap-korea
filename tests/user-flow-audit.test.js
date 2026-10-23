@@ -6,7 +6,7 @@ test('popular train pair remains chosen for date search',()=>{
  const src=read('app.js');
  assert.match(src,/state\.destinationMode='all';ui\.destinationModeToggle\.textContent='[^']+';refreshDestinations\(\{keepTo:true\}\)/);
  assert.match(src,/destinationMode:'all'/);
- assert.match(read('index.html'),/id="destinationModeToggle"[^>]*>확인된 직통역만 보기/);
+ assert.doesNotMatch(read('index.html'),/id="destinationModeToggle"/);
  assert.match(src,/state\.selected\.to=oldTo;ui\.toInput\.value=oldTo\.name/);
 });
 test('city-bus search kind invalidates pending async results',()=>{
@@ -29,12 +29,24 @@ test('train search keeps its accessible name without repeated visible heading',(
  assert.match(read('styles.css'),/\.card-head-compact\{justify-content:flex-end;margin-bottom:9px\}/);
 });
 
-test('nationwide train search hides the redundant explanation panel while keeping form controls',()=>{
+test('nationwide train search removes the redundant explanation panel while keeping form controls',()=>{
  const html=read('index.html');
- assert.match(html,/<div class="destination-match-info" hidden>/);
+ assert.doesNotMatch(html,/destination-match-info/);
+ assert.doesNotMatch(html,/id="destinationStatus"/);
+ assert.doesNotMatch(html,/id="destinationMore"/);
+ assert.doesNotMatch(html,/id="destinationModeToggle"/);
  assert.match(html,/id="fromInput"/);
  assert.match(html,/id="toInput"/);
  assert.match(html,/id="tripDate"/);
  assert.match(html,/id="serviceStatus"/);
  assert.match(read('app.js'),/destinationMode:'all'/);
+});
+
+test('train search logic tolerates physically removed destination help controls',()=>{
+ const src=read('app.js');
+ assert.match(src,/function destStatus\(message\)\{if\(ui\.destinationStatus\)/);
+ assert.match(src,/function destinationMoreState\(\)\{\s*if\(!ui\.destinationMore\)return/);
+ assert.match(src,/ui\.destinationModeToggle\?\.addEventListener/);
+ assert.match(src,/ui\.destinationMore\?\.addEventListener/);
+ assert.match(read('styles.css'),/\.search-card \.date-block\{margin-top:15px\}/);
 });
