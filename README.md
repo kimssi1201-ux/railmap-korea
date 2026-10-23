@@ -35,3 +35,10 @@ TAGO는 당일 열차별 승강장 번호를 제공하지 않습니다. 화면�
 - 시외버스는 공공데이터포털 안내에 따라 **당일 배차만 조회**하도록 클라이언트와 서버 양측에서 제한했습니다.
 - 실제 좌석 수, 구매 가능 여부, 미제공 운임 및 배차를 임의로 만들어 표시하지 않습니다. 예매는 공식 예매 사이트로 이동합니다.
 - `npm run build && npm test`로 검사합니다. 실제 인증키로 된 라이브 공공데이터 응답 검증은 별도로 수행해야 합니다.
+## 전국 시내버스 정보 (1차)
+- `/citybus.html`: TAGO 제공 지역 목록과 선택, 정류장명/번호 검색, 노선번호 검색, 경유 정류장, 실시간 도착정보, 기기 내 즐겨찾기.
+- 지역별 시내버스 API: 정류소정보(15098534), 노선정보(15098529), 도착정보(15098530) 각 활용신청 필요. TAGO 기존 키가 모든 API에서 허가되지 않을 수 있음.
+- Production Secret: 기본 `TAGO_API_KEY` 우선 활용. 별도 키면 `CITYBUS_STOPS_API_KEY`, `CITYBUS_ROUTES_API_KEY`, `CITYBUS_ARRIVALS_API_KEY` 등록 가능. 비밀키는 클라이언트/GitHub에 노출 금지.
+- GET `/api/citybus-areas`, `/api/citybus-search?city=25&kind=stops&q=시청`, `/api/citybus-arrivals?city=25&id=...`, `/api/citybus-route?city=25&id=...`.
+- 도착예정은 TAGO 지역별 지원 범위에 한정. 실시간 데이터는 최대 25초 캐시, 사용자가 누를 때만 갱신하고 자동 반복 호출하지 않음. 미제공 시간·노선/정류장 정보는 추정하지 않음.
+- 지역별 링크는 `/citybus.html?city=<TAGO-citycode>`; 공공데이터를 확인하지 않은 별도 지역 콘텐츠를 대량 생성하지 않음.
