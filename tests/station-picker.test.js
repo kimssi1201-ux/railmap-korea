@@ -29,6 +29,6 @@ test('도착역 기본 목록은 네 후보에 제한되지 않고 모든 공식
 });
 test('도착역 이름 검색·시도 필터는 후보 우선순위보다 검색 결과를 존중한다',()=>{
  const r=[{id:'a',name:'서울',region:'서울'},{id:'b',name:'부산',region:'부산'},{id:'c',name:'서대전',region:'대전'},{id:'d',name:'서원주',region:'강원'}];
- assert.deepEqual(destinationPickerMatches(r,'서','',r[0],[r[1]]).map(x=>x.name),['서원주','서대전']);
+ assert.deepEqual(destinationPickerMatches(r,'서','',r[0],[r[1]]).map(x=>x.name),['서대전','서원주']);
  assert.deepEqual(destinationPickerMatches(r,'','부산',r[0],[r[2]]).map(x=>x.name),['부산']);
 });

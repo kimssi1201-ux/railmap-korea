@@ -4,7 +4,9 @@ import {readFileSync} from 'node:fs';
 const read=name=>readFileSync(new URL('../'+name,import.meta.url),'utf8');
 test('popular train pair remains chosen for date search',()=>{
  const src=read('app.js');
- assert.match(src,/state\.destinationMode='all';ui\.destinationModeToggle\.textContent='직통역만 보기';refreshDestinations\(\{keepTo:true\}\)/);
+ assert.match(src,/state\.destinationMode='all';ui\.destinationModeToggle\.textContent='[^']+';refreshDestinations\(\{keepTo:true\}\)/);
+ assert.match(src,/destinationMode:'all'/);
+ assert.match(read('index.html'),/id="destinationModeToggle"[^>]*>확인된 직통역만 보기/);
  assert.match(src,/state\.selected\.to=oldTo;ui\.toInput\.value=oldTo\.name/);
 });
 test('city-bus search kind invalidates pending async results',()=>{
