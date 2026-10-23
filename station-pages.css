@@ -32,3 +32,6 @@
 .sp-fetch-failure{border:1px solid #e3e8ee;border-radius:12px;padding:14px;background:#fff;display:flex;flex-wrap:wrap;gap:10px}
 .sp-fetch-failure p{flex:0 0 100%;font-size:12px;line-height:1.6;margin:0;color:#5e7088}
 .sp-retry-button{border:0;background:#2168e8;color:#fff;font-weight:800;border-radius:9px;padding:10px 13px;cursor:pointer;font-size:12px}
+
+/* Only validated timetable links are shown for a selected departure day. */
+.sp-date-check{display:grid;gap:7px;margin:13px 0}.sp-date-check label{font-size:12px;font-weight:750;color:#4b6482}.sp-date-check input{width:100%;border:1px solid #d4e2ef;border-radius:10px;padding:12px;font-size:16px;background:#fff;color:#243c59}.sp-verified-route[hidden]{display:none!important}

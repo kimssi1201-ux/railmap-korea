@@ -14,7 +14,7 @@ if(app){
  async function load(){
   const date=dateInput.value,grade=gradeInput.value;
   if(date<ymd()||date>ymd(31)){message('오늘부터 31일 이내 날짜를 선택해 주세요.','error');return}
-  const requestId=++revision;submit.disabled=true;submit.textContent='공식 시간표 조회 중…';results.textContent='국토교통부 공식 데이터를 확인하고 있습니다.';message(`${fromName}역 → ${toName}역 시간표 검색 중`);
+  const requestId=++revision;submit.disabled=true;submit.textContent='공식 시간표 조회 중…';results.hidden=false;results.textContent='국토교통부 공식 데이터를 확인하고 있습니다.';message(`${fromName}역 → ${toName}역 시간표 검색 중`);
   const target=new URL(location.href);target.searchParams.set('date',date);if(grade==='전체')target.searchParams.delete('grade');else target.searchParams.set('grade',grade);history.replaceState(null,'',target);
   try{
    const u=new URL('/api/trains',location.origin);for(const [k,v] of Object.entries({from,to,date}))u.searchParams.set(k,v);
@@ -22,12 +22,20 @@ if(app){
    if(requestId!==revision)return;
    if(!response.ok||!data.ok||!Array.isArray(data.trains))throw Error(data.error||'공식 시간표 응답을 처리하지 못했습니다.');
    const rows=data.trains.filter(r=>matchesTrainFilter(r.grade,grade));
-   if(!rows.length){results.textContent=data.trains.length?'선택한 열차 종류의 조회 결과가 없습니다. 전체 열차로 바꿔보세요.':'공공데이터에서 이 구간의 직통 시간표를 받지 못했습니다. 운행 여부는 공식 예매처에서 재확인해 주세요.'}
-   else renderTrainTimetable(results,rows,{from:fromName,to:toName,date});
-   message(`${date} 기준 · ${rows.length}건 표시${data.partial?' · 일부 배차 누락 가능':''}. 잔여좌석과 최종 운행정보는 공식 예매처에서 확인하세요.`,data.partial?'warning':'ok');
+   if(!rows.length){
+    // No blank schedule table or misleading green "0 results" success message.
+    results.replaceChildren();results.hidden=true;
+    const note=data.trains.length?'선택한 열차 종류에 확인된 운행이 없습니다. 다른 종류로 바꿔보세요.':
+      data.partial?'공식 데이터가 일부만 도착해 이 구간의 운행 여부를 판단할 수 없습니다.':
+      '해당 날짜에 확인된 직통 시간표가 없어 빈 결과 표를 표시하지 않습니다. 다른 날짜나 목적지를 선택해 주세요.';
+    message(note,'warning');return;
+   }
+   results.hidden=false;
+   renderTrainTimetable(results,rows,{from:fromName,to:toName,date});
+   message(`${date} 기준 · ${rows.length}건 확인${data.partial?' · 일부 배차 누락 가능':''}. 잔여좌석과 최종 운행정보는 공식 예매처에서 확인하세요.`,data.partial?'warning':'ok');
   }catch(error){
    if(requestId!==revision)return;
-   results.replaceChildren();
+   results.hidden=false;results.replaceChildren();
    const box=document.createElement('div');box.className='sp-fetch-failure';
    const summary=document.createElement('p');summary.textContent='공식 열차정보 서버에서 시간표를 받아오지 못했습니다. 실제 운행이 없다는 뜻은 아닙니다.';
    const retry=document.createElement('button');retry.type='button';retry.className='sp-retry-button';retry.textContent='다시 조회하기';retry.addEventListener('click',()=>load());

@@ -21,6 +21,6 @@ test('SSR station and route response has HTML and canonical URL',async()=>{
 });
 test('directory contains all ten and sitemap only curated URLs',()=>{
  const html=stationIndexHtml();for(const station of FEATURED_STATIONS)assert.ok(html.includes('/stations/'+station.id));
- const links=sitemapUrls();assert.equal(links.length,2+10+FEATURED_PAIRS.length*2);assert.equal(new Set(links).size,links.length);
+ const links=sitemapUrls();assert.equal(links.length,12);assert.equal(new Set(links).size,links.length);assert.ok(!links.some(link=>link.startsWith('/routes/')),'검증되지 않은 구간 상세페이지는 사이트맵에서 제외');
  assert.ok(recommendedDestinations('NAT130126').some(s=>s.name==='강릉'));
 });
