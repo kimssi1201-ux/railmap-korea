@@ -1,22 +1,31 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {FEATURED_STATIONS,stationDetailHtml} from '../station-pages.js';
-test('station guide does not show all unverified destinations',()=>{
+
+test('every featured station displays one direct timetable search and no candidate expansion',()=>{
  for(const station of FEATURED_STATIONS){
   const html=stationDetailHtml(station);
-  assert.match(html,/id="spVerifiedRoutes"/);
-  assert.match(html,/data-candidates=/);
-  assert.ok(!html.includes('id="spDestinationSelect"'));
-  assert.ok(!html.includes('id="spDestinationGo"'));
+  assert.match(html,/id="spStationLookup"/);
+  assert.match(html,/id="spStationForm"/);
+  assert.match(html,/id="spCheckDate"/);
+  assert.match(html,/id="spDestinationInput"/);
+  assert.match(html,/id="spDestinationOptions"/);
+  assert.match(html,/id="spStationSubmit"/);
+  assert.match(html,/id="spStationResults"/);
+  assert.ok(!html.includes('id="spVerifiedRoutes"'));
+  assert.ok(!html.includes('id="spLoadMoreRoutes"'));
+  assert.ok(!html.includes('id="spOtherStationQuery"'));
+  assert.ok(!html.includes('data-candidates='));
+  assert.ok(!html.includes('다른 주요역 찾아보기'));
+  assert.ok(!html.includes('추천 후보 더 확인'));
   assert.ok(!html.includes('href="/routes/'),station.name);
+  assert.equal((html.match(/id="spStationForm"/g)||[]).length,1);
  }
 });
-test('station detail clearly distinguishes a recommended subset from all possible destinations',()=>{
+test('Yongsan station search is no longer restricted to two featured destinations',()=>{
  const html=stationDetailHtml(FEATURED_STATIONS.find(s=>s.name==='용산'));
- assert.match(html,/일부 추천 구간/);
- assert.match(html,/id="spLoadMoreRoutes"/);
- assert.match(html,/id="spOtherStationQuery"/);
- assert.match(html,/id="spOtherStationMatches"/);
  assert.match(html,/data-station-name="용산"/);
- assert.ok(!html.includes('선택한 날짜에 운행편이 확인된 2개 목적지만 표시합니다.'));
+ assert.match(html,/예: 익산, 전주, 광주송정/);
+ assert.match(html,/실제 직통 열차 시간표/);
+ assert.match(html,/환승편이 있을 수 있습니다/);
 });

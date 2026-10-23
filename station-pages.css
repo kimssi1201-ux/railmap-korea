@@ -45,3 +45,25 @@
 .sp-other-station-matches{display:flex;flex-wrap:wrap;gap:7px;margin:11px 0}
 .sp-station-choice{padding:11px 14px;border-radius:9px;border:1px solid #b8d3f7;background:white;color:#265f9c;font-size:13px;font-weight:750}
 .sp-station-choice:disabled{opacity:.5}
+
+/* Simple single-query station detail page: mobile-first, no repeated candidate panels. */
+.sp-lookup{padding:22px}
+.sp-station-form{display:flex;flex-direction:column;gap:9px}
+.sp-station-form>label{color:#4a627c;font-weight:800;font-size:13px;margin-top:5px}
+.sp-station-form>input,.sp-station-picker input{width:100%;min-width:0;height:49px;border:1px solid #d4e2ef;border-radius:11px;background:#fff;padding:0 13px;color:#243e5e;font-size:16px}
+.sp-station-picker{position:relative;min-width:0}
+.sp-station-options{position:absolute;z-index:20;left:0;right:0;top:calc(100% + 4px);background:white;border:1px solid #cfdbeb;border-radius:12px;box-shadow:0 10px 28px #1f3d6129;max-height:min(42vh,275px);overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+.sp-station-options[hidden]{display:none!important}
+.sp-station-options button{width:100%;min-height:46px;display:flex;align-items:center;justify-content:space-between;gap:8px;text-align:left;padding:12px 14px;background:#fff;border:0;border-bottom:1px solid #edf2f7;color:#244466}
+.sp-station-options button:focus-visible,.sp-station-options button:hover{background:#eef5ff}
+.sp-station-options button strong{font-size:14px}
+.sp-station-options button small{font-size:11px;color:#7a8da0}
+.sp-station-options-hint,.sp-station-options-empty{padding:11px 14px;margin:0;font-size:12px;color:#5f758f;line-height:1.5;background:#f5f9ff}
+.sp-station-list-status{font-size:11px!important;color:#72869e!important;margin:1px 0 5px!important}
+.sp-station-submit{width:100%;min-height:51px;border:0;border-radius:11px;background:#2168e8;color:white;font-size:15px;font-weight:850;padding:12px}
+.sp-station-submit:disabled{opacity:.63;cursor:wait}
+.sp-station-results{margin:14px 0;min-width:0}
+.sp-station-results .timetable-shell{box-shadow:none}
+.sp-lookup .sp-external{margin-top:13px}
+.sp-lookup .sp-result-status:empty{display:none}
+@media(max-width:490px){.sp-lookup{padding:19px 16px}}
