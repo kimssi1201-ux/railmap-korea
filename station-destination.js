@@ -1,7 +1,6 @@
 import {renderTrainTimetable} from './timetable-view.js';
 import {stationGuideOptions,stationGuideOptionCount} from './station-destination-options.js';
 import {getStation,normalizeName} from './station-utils.js';
-import {searchOneTransfer,renderTransferCards} from './rail-transfers.js';
 
 const app=document.getElementById('spStationLookup');
 if(app){
@@ -26,7 +25,7 @@ if(app){
  function resetResults(){
   requestId++;
   controller?.abort();controller=null;
-  submit.disabled=!loaded;submit.textContent='직통·환승 시간표 조회하기 →';
+  submit.disabled=!loaded;submit.textContent='시간표 확인하기 →';
   status.textContent='';status.dataset.status='';
   results.hidden=true;results.replaceChildren();
  }
@@ -96,7 +95,7 @@ if(app){
   const active=new AbortController();
   controller=active;
   const signal=active.signal;
-  const timer=setTimeout(()=>active.abort(),28000);
+  const timer=setTimeout(()=>active.abort(),18000);
   submit.disabled=true;submit.textContent='공식 시간표 확인 중…';
   status.textContent=fromName+'역 → '+label(to)+' · 시간표 조회 중';
   status.dataset.status='';
@@ -109,24 +108,9 @@ if(app){
    if(!response.ok||!data.ok||!Array.isArray(data.trains))throw Error(data.error||'공식 열차정보를 조회하지 못했습니다.');
    const trains=data.trains.filter(row=>/^\d{12,14}$/.test(String(row.depTime))&&/^\d{12,14}$/.test(String(row.arrTime)));
    if(!trains.length){
-    status.textContent='직통 시간표 미확인 · 당일 1회 환승편 조회 중…';
-    status.dataset.status='warning';
-    const transfer=await searchOneTransfer({from:{id:from,name:fromName},to,date,stations:official,signal});
-    if(id!==requestId)return;
-    if(transfer.routes.length){
-     renderTransferCards(results,transfer.routes);results.hidden=false;
-     status.textContent='TAGO 시간표로 연결된 당일 1회 환승 '+transfer.routes.length+'개 경로'+
-      (transfer.partial||data.partial||transfer.failedHubs?' · 일부 조회 누락 가능':'')+' · 좌석·플랫폼은 예매처에서 확인';
-     status.dataset.status='ok';
-    }else{
-     results.replaceChildren();results.hidden=true;
-     status.textContent=(data.partial?'직통 조회 일부 누락 · ':'직통 확인 안 됨 · ')+
-      (transfer.hubsChecked?transfer.hubsChecked+'개 후보 환승역에서 연결 시간표 미확인':'등록된 1회 환승 후보역 없음')+
-      (transfer.failedHubs||transfer.partial?' · 일부 API 응답 미확인':'')+
-      '. 전체 운행·환승 경로가 없다는 뜻은 아닙니다.';
-     status.dataset.status='warning';
-    }
-    return;
+    status.textContent=data.partial?'공식 시간표 일부가 누락되어 직통 운행을 확정하지 못했습니다.':
+     '해당 날짜에 직통 시간표가 확인되지 않았습니다. 환승편은 공식 예매처에서 확인해 주세요.';
+    status.dataset.status='warning';return;
    }
    renderTrainTimetable(results,trains,{from:fromName,to:to.name,date});
    results.hidden=false;results.scrollIntoView({block:'nearest',behavior:'smooth'});
@@ -139,7 +123,7 @@ if(app){
    status.dataset.status='error';
   }finally{
    clearTimeout(timer);
-   if(id===requestId){controller=null;submit.disabled=false;submit.textContent='직통·환승 시간표 조회하기 →';}
+   if(id===requestId){controller=null;submit.disabled=false;submit.textContent='시간표 확인하기 →';}
   }
  }
  form.addEventListener('submit',lookup);
@@ -151,7 +135,7 @@ if(app){
   official=[...new Map(data.stations.filter(s=>s&&typeof s.id==='string'&&typeof s.name==='string'&&s.id!==from).map(s=>[s.id,s])).values()];
   if(!official.length)throw Error('조회 가능한 도착역 목록이 없습니다.');
   loaded=true;submit.disabled=false;
-  listStatus.textContent='전국 공식 역 '+official.length+'곳 검색 가능'+(data.partial?' · 일부 역 정보 누락 가능':'')+' · 직통 여부는 조회 후 확인';
+  listStatus.textContent='도착역 '+official.length+'곳 검색 가능'+(data.partial?' · 일부 역 정보 누락 가능':'');
   if(document.activeElement===input)suggest();
  })
  .catch(error=>{
