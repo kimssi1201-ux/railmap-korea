@@ -25,7 +25,16 @@ if(app){
    if(!rows.length){results.textContent=data.trains.length?'선택한 열차 종류의 조회 결과가 없습니다. 전체 열차로 바꿔보세요.':'공공데이터에서 이 구간의 직통 시간표를 받지 못했습니다. 운행 여부는 공식 예매처에서 재확인해 주세요.'}
    else renderTrainTimetable(results,rows,{from:fromName,to:toName,date});
    message(`${date} 기준 · ${rows.length}건 표시${data.partial?' · 일부 배차 누락 가능':''}. 잔여좌석과 최종 운행정보는 공식 예매처에서 확인하세요.`,data.partial?'warning':'ok');
-  }catch(error){if(requestId!==revision)return;results.textContent='공식 API 조회에 실패했습니다. 상단 검색 조건과 공식 예매처를 확인해 주세요.';message(error.message||'열차 시간표를 확인하지 못했습니다.','error')}
+  }catch(error){
+   if(requestId!==revision)return;
+   results.replaceChildren();
+   const box=document.createElement('div');box.className='sp-fetch-failure';
+   const summary=document.createElement('p');summary.textContent='공식 열차정보 서버에서 시간표를 받아오지 못했습니다. 실제 운행이 없다는 뜻은 아닙니다.';
+   const retry=document.createElement('button');retry.type='button';retry.className='sp-retry-button';retry.textContent='다시 조회하기';retry.addEventListener('click',()=>load());
+   const official=document.createElement('a');official.className='sp-secondary-link';official.href='https://www.korail.com/';official.target='_blank';official.rel='noopener noreferrer';official.textContent='코레일에서 확인 ↗';
+   box.append(summary,retry,official);results.append(box);
+   message(error.message||'열차 시간표를 확인하지 못했습니다.','error');
+  }
   finally{if(requestId===revision){submit.disabled=false;submit.textContent='시간표 조회하기'}}
  }
  form.addEventListener('submit',e=>{e.preventDefault();load()});
