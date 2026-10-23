@@ -85,12 +85,17 @@
 /* Compact destination autocomplete: no massive list on focus. */
 .sp-lookup .sp-station-options{max-height:min(29dvh,232px)}
 
-/* Officially confirmed same-station 1-transfer itineraries (not guaranteed seats). */
-.transfer-card{border:1px solid #d6e4f3;background:#f8fbff;border-radius:12px;padding:14px;margin:10px 0;min-width:0}
-.transfer-heading{color:#244a72;font-size:14px}
-.transfer-summary{color:#24415f;font-weight:800;font-size:13px;margin:9px 0}
-.transfer-legs{border-left:2px solid #cbdcf1;padding-left:12px;margin:9px 0}
-.transfer-legs p{font-size:12px;line-height:1.6;margin:7px 0;color:#2d4764;word-break:keep-all}
-.transfer-legs .transfer-wait{color:#a46a16;font-weight:750}
-.transfer-card small{display:block;color:#657b92;font-size:11px;margin-top:8px}
-.results-section .transfer-card{background:#fff}
+
+/* Simpler mobile flow: region → station → direct timetable. */
+.sp-content{padding-top:10px}
+.sp-content .sp-hero{margin:8px 0 13px}
+.sp-hero-compact{margin:7px 0 12px!important}
+.sp-hero-compact h1{font-size:clamp(22px,5vw,28px);margin-bottom:0}
+.sp-landing-search-cta{margin-bottom:13px}
+#spNationwide>h2{font-size:17px}
+#spNationwide>p{margin-bottom:12px}
+.sp-station-meta{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid #eef1f5}
+.sp-station-meta strong{color:#253e5e;font-size:15px}
+.sp-station-meta span{color:#71849b;font-size:12px}
+.sp-lookup .sp-lookup-intro{margin-bottom:14px;font-size:12px}
+.sp-lookup .sp-station-form{gap:8px}
