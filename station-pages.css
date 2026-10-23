@@ -40,3 +40,8 @@
 .sp-search-other strong{font-size:13px;color:#284c76}
 .sp-search-other p{font-size:12px;line-height:1.6;color:#607c98;margin:7px 0 11px}
 #spVerifiedRoutes:empty{display:none}
+
+/* Select any TAGO-registered station to verify a direct route on the chosen date. */
+.sp-other-station-matches{display:flex;flex-wrap:wrap;gap:7px;margin:11px 0}
+.sp-station-choice{padding:11px 14px;border-radius:9px;border:1px solid #b8d3f7;background:white;color:#265f9c;font-size:13px;font-weight:750}
+.sp-station-choice:disabled{opacity:.5}
