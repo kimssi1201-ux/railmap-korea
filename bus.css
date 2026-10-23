@@ -97,3 +97,5 @@
 .timetable-action{border:1px solid #b8d3f7;background:#eaf3ff;color:#175aa4;padding:9px 11px;border-radius:9px;font-size:11px;font-weight:800;white-space:nowrap;min-height:36px;display:inline-flex;align-items:center}
 .timetable-button{font-family:inherit;cursor:pointer}.timetable-caption{font-size:11px;color:#758a9f;padding:11px 15px 13px;margin:0;border-top:1px solid #edf1f6}
 @media(max-width:355px){.timetable-table{font-size:11px}.timetable-table td{padding:12px 5px}.timetable-table th{padding:12px 5px;font-size:10px}.timetable-table th:first-child{padding-left:9px}.timetable-table td:first-child{padding-left:9px}.timetable-toggle strong{font-size:12px}.timetable-table td.timetable-data:last-child{font-size:10px}}
+
+.bus-verify-link{display:inline-flex;align-items:center;min-height:38px;padding:7px 10px;margin:4px 3px 3px 0;border-radius:9px;background:#e7f1ff;border:1px solid #bcd6fc;color:#1459a9;font-size:12px;font-weight:800}

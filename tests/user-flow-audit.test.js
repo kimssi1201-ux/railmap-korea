@@ -1,0 +1,19 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+const read=name=>readFileSync(new URL('../'+name,import.meta.url),'utf8');
+test('popular train pair remains chosen for date search',()=>{
+ const src=read('app.js');
+ assert.match(src,/state\.destinationMode='all';ui\.destinationModeToggle\.textContent='직통역만 보기';refreshDestinations\(\{keepTo:true\}\)/);
+ assert.match(src,/state\.selected\.to=oldTo;ui\.toInput\.value=oldTo\.name/);
+});
+test('city-bus search kind invalidates pending async results',()=>{
+ const src=read('citybus.js');
+ assert.match(src,/function setKind\(kind\)\{\+\+state\.searchId;\+\+state\.detailId;/);
+ assert.match(src,/ui\.cityMore\.disabled=true/);
+});
+test('avoid duplicate full-search links and erroneous device-wide storage claims',()=>{
+ assert.ok(!read('station-pages.js').includes('전체 기차 검색으로 이동 →'));
+ assert.ok(!read('citybus.html').includes('이 아이폰에만 저장'));
+ assert.ok(!read('citybus.html').includes('class="city-help"'));
+});
