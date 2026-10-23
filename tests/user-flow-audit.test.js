@@ -19,3 +19,12 @@ test('avoid duplicate full-search links and erroneous device-wide storage claims
  assert.ok(!read('citybus.html').includes('이 아이폰에만 저장'));
  assert.ok(!read('citybus.html').includes('class="city-help"'));
 });
+
+test('train search keeps its accessible name without repeated visible heading',()=>{
+ const html=read('index.html');
+ assert.match(html,/<section class="search-card" aria-labelledby="searchTitle">/);
+ assert.match(html,/<h2 id="searchTitle" class="sr-only">열차 검색<\/h2>/);
+ assert.match(html,/<div class="card-head card-head-compact">/);
+ assert.match(html,/id="serviceStatus"/);
+ assert.match(read('styles.css'),/\.card-head-compact\{justify-content:flex-end;margin-bottom:9px\}/);
+});

@@ -44,3 +44,7 @@
 .suggestions button[role=option]{min-height:50px;gap:8px}
 .suggestions button[role=option] small{flex:none;font-size:11px}
 .station-picker-foot{position:sticky;bottom:0;z-index:2;padding:10px 12px;border-top:1px solid #dce8f6;background:#eaf3ff;color:#376493;font-size:11px;line-height:1.5;font-weight:700}
+
+/* Keep the form accessible while removing its repetitive visible heading. */
+.card-head-compact{justify-content:flex-end;margin-bottom:9px}
+.card-head-compact .service-status{max-width:100%}
