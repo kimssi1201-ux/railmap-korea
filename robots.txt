@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://railmap-korea.pages.dev/sitemap.xml
