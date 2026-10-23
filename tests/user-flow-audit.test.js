@@ -65,11 +65,20 @@ test('regional rail-station directory is landing page; train form survives on de
  assert.match(search,/href="\/train.html" aria-current="page"/);
 });
 
-test('train timetable search displays true 1-transfer options when direct trains are not found',()=>{
+test('dedicated train timetable stays a direct lookup without automatic transfers',()=>{
  const src=read('app.js'),page=read('train.html');
- assert.match(src,/searchOneTransfer\(\{from,to,date,stations:state\.stations\}\)/);
- assert.match(src,/renderTransferCards/);
- assert.match(src,/state\.transferState==='searching'/);
- assert.match(page,/app\.js\?v=rail-transfer-v1/);
- assert.match(page,/station-pages\.css\?v=rail-transfer-v1/);
+ assert.doesNotMatch(src,/searchOneTransfer/);
+ assert.doesNotMatch(src,/renderTransferCards/);
+ assert.match(src,/\/api\/trains/);
+ assert.match(page,/app\.js\?v=rail-simple-v1/);
+ assert.match(page,/station-pages\.css\?v=rail-simple-v1/);
+});
+
+test('homepage prompts for region and hides the long nationwide list until a choice',()=>{
+ const home=read('index.html'),directory=read('station-directory.js');
+ assert.match(home,/지역 선택/);
+ assert.doesNotMatch(home,/빠른 바로가기 · 주요역 10곳/);
+ assert.match(directory,/const awaitingChoice=region==='전체'&&!q/);
+ assert.match(directory,/stations=\[\],limit=12/);
+ assert.match(directory,/awaitingChoice\?\[\]:listed\.slice\(0,limit\)/);
 });
