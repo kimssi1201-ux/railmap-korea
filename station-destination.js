@@ -1,5 +1,5 @@
 import {renderTrainTimetable} from './timetable-view.js';
-import {stationGuideOptions} from './station-destination-options.js';
+import {stationGuideOptions,stationGuideOptionCount} from './station-destination-options.js';
 import {getStation,normalizeName} from './station-utils.js';
 
 const app=document.getElementById('spStationLookup');
@@ -35,7 +35,9 @@ if(app){
  }
  function suggest(){
   const query=input.value.trim();
-  const matches=stationGuideOptions({id:from,name:fromName},official,query);
+  const origin={id:from,name:fromName};
+  const matches=stationGuideOptions(origin,official,query);
+  const total=stationGuideOptionCount(origin,official,query);
   options.replaceChildren();
   if(!loaded){hideOptions();return;}
   if(!matches.length){
@@ -45,8 +47,8 @@ if(app){
   }else{
    const hint=document.createElement('p');
    hint.className='sp-station-options-hint';
-   hint.textContent=query?'검색 결과 '+matches.length+'개 역 · 실제 직통 여부는 조회 후 확인':
-    '전국 등록 도착역 '+matches.length+'개 · 역을 선택하거나 이름으로 검색하세요';
+   hint.textContent=query?'일치하는 역 '+total+'개 중 '+matches.length+'개 표시'+(total>matches.length?' · 더 입력해 주세요':''):
+    '주요 역 '+matches.length+'개 먼저 표시 · 다른 역은 이름으로 검색';
    options.append(hint);
    for(const station of matches){
     const button=document.createElement('button');button.type='button';button.setAttribute('role','option');

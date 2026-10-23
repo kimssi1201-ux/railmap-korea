@@ -81,3 +81,6 @@
 .sp-landing-search-cta{margin:0 0 16px}
 .sp-landing-search-cta .sp-secondary-link{display:block;text-align:center;padding:13px 10px;font-size:13px;background:#2168e8;border-color:#2168e8;color:#fff}
 @media(max-width:400px){.sp-landing-search-cta .sp-secondary-link{font-size:12px}}
+
+/* Compact destination autocomplete: no massive list on focus. */
+.sp-lookup .sp-station-options{max-height:min(29dvh,232px)}
