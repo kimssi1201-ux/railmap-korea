@@ -28,7 +28,7 @@ test('Yongsan station search is no longer restricted to two featured destination
  assert.match(html,/data-station-name="용산"/);
  assert.match(html,/예: 익산, 전주, 광주송정/);
  assert.match(html,/공식 직통 시간표를 조회하세요/);
- assert.match(html,/환승편이 있을 수 있습니다/);
+ assert.match(html,/환승 경로·좌석·운행 변경은 공식 예매처에서 확인하세요/);
 });
 
 test('station destination input has visible options container for nationwide lookups',()=>{
