@@ -30,3 +30,7 @@
 .hero-banner picture{display:block;width:100%}
 .hero-banner picture img{display:block;width:100%;height:auto;border-radius:15px;border:1px solid #dfebf5;background:#e9f5ff;object-fit:cover}
 @media(max-width:420px){.content{padding-top:16px}.hero-banner{margin-bottom:14px}.hero-banner picture img{border-radius:12px}}
+
+.destination-match-info{display:flex;flex-wrap:wrap;align-items:center;gap:7px 12px;margin:9px 0 2px;padding:10px 12px;border:1px solid #dce8f5;background:#f5f9ff;border-radius:11px}
+.destination-match-info p{flex:1 1 210px;font-size:11px;line-height:1.55;color:#516f90;margin:0}
+.destination-match-info button{background:#e4efff;border:1px solid #b7d0f4;color:#2469b0;font-weight:800;font-size:11px;padding:9px 11px;border-radius:9px}
