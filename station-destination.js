@@ -26,7 +26,7 @@ if(app){
  function resetResults(){
   requestId++;
   controller?.abort();controller=null;
-  submit.disabled=!loaded;submit.textContent='직통 시간표 조회하기 →';
+  submit.disabled=!loaded;submit.textContent='직통·환승 시간표 조회하기 →';
   status.textContent='';status.dataset.status='';
   results.hidden=true;results.replaceChildren();
  }
@@ -139,7 +139,7 @@ if(app){
    status.dataset.status='error';
   }finally{
    clearTimeout(timer);
-   if(id===requestId){controller=null;submit.disabled=false;submit.textContent='직통 시간표 조회하기 →';}
+   if(id===requestId){controller=null;submit.disabled=false;submit.textContent='직통·환승 시간표 조회하기 →';}
   }
  }
  form.addEventListener('submit',lookup);

@@ -78,7 +78,7 @@ export async function searchOneTransfer({from,to,date,stations,signal,fetchLeg=f
    ]);
    if(signal?.aborted)throw Error('aborted');
    partial=partial||!!first.partial||!!second.partial;
-   results.push(...connectTimedTrains(first.trains,second.trains,hub,{date,maxResults:8}));
+   results.push(...connectTimedTrains(first.trains,second.trains,hub,{date,maxResults:8}).map(option=>({...option,fromName:from.name,toName:to.name})));
   }catch(error){
    if(signal?.aborted)throw error;
    failed++;
@@ -101,9 +101,9 @@ export function renderTransferCards(container,routes){
   const summary=document.createElement('p');summary.className='transfer-summary';
   summary.textContent=clockFromTrainTime(item.first.depTime)+' 출발 → '+clockFromTrainTime(item.second.arrTime)+' 도착 · 총 '+item.durationMinutes+'분';
   const legs=document.createElement('div');legs.className='transfer-legs';
-  const first=document.createElement('p');first.textContent='① '+(item.first.grade||'열차')+' '+(item.first.trainNo||'')+'  '+clockFromTrainTime(item.first.depTime)+' → '+clockFromTrainTime(item.first.arrTime);
+  const first=document.createElement('p');first.textContent='① '+String(item.fromName||item.first.fromName||'출발').replace(/역$/u,'')+' → '+String(item.hub.name).replace(/역$/u,'')+' · '+(item.first.grade||'열차')+' '+(item.first.trainNo||'')+'  '+clockFromTrainTime(item.first.depTime)+'–'+clockFromTrainTime(item.first.arrTime);
   const change=document.createElement('p');change.className='transfer-wait';change.textContent='환승 대기 '+item.waitMinutes+'분 · 플랫폼은 현장에서 확인';
-  const second=document.createElement('p');second.textContent='② '+(item.second.grade||'열차')+' '+(item.second.trainNo||'')+'  '+clockFromTrainTime(item.second.depTime)+' → '+clockFromTrainTime(item.second.arrTime);
+  const second=document.createElement('p');second.textContent='② '+String(item.hub.name).replace(/역$/u,'')+' → '+String(item.toName||item.second.toName||'도착').replace(/역$/u,'')+' · '+(item.second.grade||'열차')+' '+(item.second.trainNo||'')+'  '+clockFromTrainTime(item.second.depTime)+'–'+clockFromTrainTime(item.second.arrTime);
   legs.append(first,change,second);
   card.append(heading,summary,legs);
   if(item.fare!==null){const fare=document.createElement('small');fare.textContent='구간별 성인 운임 합계 '+item.fare.toLocaleString('ko-KR')+'원 (API 제공 기준)';card.append(fare);}

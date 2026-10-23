@@ -36,7 +36,7 @@ test('응답 오류는 확인 불가로 분리하고 가짜 시간표를 생성�
   if(from===all[1].id&&to===all[2].id)return {trains:[{depTime:'20261023104500',arrTime:'20261023123000',trainNo:'902'}]};
   throw Error('unknown pair');
  }});
- assert.equal(success.routes.length,1);assert.equal(success.routes[0].hub.name,'서울');
+ assert.equal(success.routes.length,1);assert.equal(success.routes[0].hub.name,'서울');assert.equal(success.routes[0].fromName,'강릉');assert.equal(success.routes[0].toName,'천안아산');
 });
 test('API 호출은 기존 경로와 동일한 역 ID와 날짜만 전달',async()=>{
  let called;

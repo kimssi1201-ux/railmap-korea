@@ -36,7 +36,7 @@ const nav=`<nav class="transport-tabs" aria-label="교통수단 선택"><a href=
 const stationLink=(s,extra='')=>`<a class="sp-link" href="${stationUrl(s.id)}"><strong>${escapeHtml(baseStationName(s.name))}역</strong><small>${escapeHtml(extra||s.region)} · 역 정보 및 구간 조회</small><span aria-hidden="true">→</span></a>`;
 function layout({path,title,description,heading,crumbs,body,script='',noindex=false}){
  const crumb=crumbs.map(([label,href])=>href?`<a href="${href}">${escapeHtml(label)}</a>`:`<span>${escapeHtml(label)}</span>`).join('<span aria-hidden="true">›</span>');
- return `<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#ffffff"><title>${escapeHtml(title)}</title><meta name="description" content="${escapeHtml(description)}"><link rel="canonical" href="${origin}${path}"><meta property="og:title" content="${escapeHtml(title)}"><meta property="og:description" content="${escapeHtml(description)}">${noindex?'<meta name="robots" content="noindex">':''}<link rel="stylesheet" href="/styles.css?v=audit-ux-v1"><link rel="stylesheet" href="/bus.css?v=audit-ux-v1"><link rel="stylesheet" href="/station-pages.css?v=rail-transfer-v1">${script?`<script type="module" src="${script}?v=rail-transfer-v1"></script>`:''}</head><body><div class="app"><header class="site-header"><a class="logo" href="/" aria-label="레일맵 홈"><span class="logo-icon" aria-hidden="true">🚆</span><span>RAIL<span>MAP</span></span></a><a class="sp-header-link" href="/train.html">열차 시간표</a></header><main class="content sp-content">${nav}<div class="sp-breadcrumb" aria-label="현재 위치">${crumb}</div><section class="sp-hero"><div class="sp-eyebrow">RAILMAP · 전국 철도 안내</div><h1>${escapeHtml(heading)}</h1><p>${escapeHtml(description)}</p></section>${body}</main><footer class="footer"><span>© RAILMAP</span><div><a href="/train.html">시간표 검색</a><a href="https://www.korail.com/" target="_blank" rel="noopener noreferrer">코레일 공식</a><a href="https://etk.srail.kr/main.do" target="_blank" rel="noopener noreferrer">SRT 공식</a></div></footer></div></body></html>`;
+ return `<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#ffffff"><title>${escapeHtml(title)}</title><meta name="description" content="${escapeHtml(description)}"><link rel="canonical" href="${origin}${path}"><meta property="og:title" content="${escapeHtml(title)}"><meta property="og:description" content="${escapeHtml(description)}">${noindex?'<meta name="robots" content="noindex">':''}<link rel="stylesheet" href="/styles.css?v=audit-ux-v1"><link rel="stylesheet" href="/bus.css?v=audit-ux-v1"><link rel="stylesheet" href="/station-pages.css?v=rail-transfer-v2">${script?`<script type="module" src="${script}?v=rail-transfer-v2"></script>`:''}</head><body><div class="app"><header class="site-header"><a class="logo" href="/" aria-label="레일맵 홈"><span class="logo-icon" aria-hidden="true">🚆</span><span>RAIL<span>MAP</span></span></a><a class="sp-header-link" href="/train.html">열차 시간표</a></header><main class="content sp-content">${nav}<div class="sp-breadcrumb" aria-label="현재 위치">${crumb}</div><section class="sp-hero"><div class="sp-eyebrow">RAILMAP · 전국 철도 안내</div><h1>${escapeHtml(heading)}</h1><p>${escapeHtml(description)}</p></section>${body}</main><footer class="footer"><span>© RAILMAP</span><div><a href="/train.html">시간표 검색</a><a href="https://www.korail.com/" target="_blank" rel="noopener noreferrer">코레일 공식</a><a href="https://etk.srail.kr/main.do" target="_blank" rel="noopener noreferrer">SRT 공식</a></div></footer></div></body></html>`;
 }
 export function stationIndexHtml(){
  const regions=[...new Set(FEATURED_STATIONS.map(s=>s.region))];
@@ -51,7 +51,7 @@ export function stationDetailHtml(s){
  const featured=Boolean(stationById(s.id));
  const body=`<section class="sp-card sp-lookup" id="spStationLookup" data-station="${escapeHtml(s.id)}" data-station-name="${escapeHtml(name)}">
   <h2>${escapeHtml(name)}역 출발 시간표</h2>
-  <p>날짜와 도착역을 선택해 공식 직통 열차 시간표를 조회하세요.</p>
+  <p>날짜와 도착역을 고르면 직통 열차부터 확인하고, 없을 때 당일 1회 환승편도 찾아봅니다.</p>
   <form id="spStationForm" class="sp-station-form" autocomplete="off">
    <label for="spCheckDate">가는 날짜</label>
    <input id="spCheckDate" type="date" required>
@@ -61,7 +61,7 @@ export function stationDetailHtml(s){
     <div id="spDestinationOptions" class="sp-station-options" role="listbox" hidden></div>
    </div>
    <p id="spStationListStatus" class="sp-station-list-status" role="status">전국 역 목록을 불러오는 중입니다.</p>
-   <button id="spStationSubmit" class="sp-station-submit" type="submit">직통 시간표 조회하기 →</button>
+   <button id="spStationSubmit" class="sp-station-submit" type="submit">직통·환승 시간표 조회하기 →</button>
   </form>
   <p id="spStationResultStatus" class="sp-result-status" role="status" aria-live="polite"></p>
   <div id="spStationResults" class="sp-station-results" hidden></div>
