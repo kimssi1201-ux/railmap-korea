@@ -41,3 +41,40 @@
 /* 4-mode navigation: no horizontal scroll on iPhone. */
 @media(max-width:480px){.transport-tabs{gap:5px}.transport-tabs a{font-size:11px;letter-spacing:-.2px;min-width:0;min-height:42px}}
 @media(max-width:350px){.transport-tabs a{font-size:10px;letter-spacing:-.4px}}
+
+/* Regional directory sits behind one tap so quick timetable search stays visible. */
+.bus-region-directory{background:#fff;border:1px solid #e0e8f2;border-radius:17px;margin:0 0 17px;box-shadow:0 3px 16px #18324909;overflow:hidden}
+.bus-region-toggle{display:flex;width:100%;align-items:center;justify-content:space-between;gap:12px;border:0;background:#fff;color:#203952;padding:16px 18px;text-align:left}
+.bus-region-toggle-text{display:flex;min-width:0;flex-direction:column;gap:5px}
+.bus-region-toggle-text strong{font-size:16px;font-weight:850}
+.bus-region-toggle-text small{font-size:12px;font-weight:600;color:#7890aa}
+.bus-region-toggle-action{flex:none;color:#1766d7;background:#eaf3ff;border-radius:9px;padding:8px 10px;font-size:12px;font-weight:750}
+.bus-region-panel{border-top:1px solid #e7edf4;padding:15px 15px 18px}
+.bus-region-help,.bus-region-footnote{color:#74869b;font-size:11px;line-height:1.65;margin:0 0 13px}
+.bus-region-chips{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px}
+.bus-region-chip{display:flex;flex-direction:column;justify-content:center;align-items:center;gap:3px;min-width:0;min-height:57px;background:#f8fafc;border:1px solid #e4eaf2;border-radius:10px;color:#34506b}
+.bus-region-chip strong{font-size:13px;font-weight:800}
+.bus-region-chip small{font-size:10px;color:#8697aa}
+.bus-region-chip.active{background:#e9f3ff;border-color:#80b2f7;color:#1764c6}
+.bus-region-chip.active small{color:#1764c6}
+.bus-region-chip:disabled{opacity:.38;cursor:default}
+.bus-region-status{color:#34587f;font-size:12px;font-weight:750;padding:13px 1px 9px;margin:0}
+.bus-municipality-list{display:flex;flex-direction:column;gap:8px}
+.bus-municipality{border:1px solid #e4eaf2;border-radius:10px;overflow:hidden;background:#fff}
+.bus-municipality summary{display:flex;align-items:center;gap:10px;cursor:pointer;list-style:none;padding:13px 14px;background:#fff;min-height:48px}
+.bus-municipality summary::-webkit-details-marker{display:none}
+.bus-municipality summary strong{font-size:14px;color:#244562}
+.bus-municipality summary small{color:#8396a8;font-size:12px}
+.bus-municipality summary::after{content:'⌄';margin-left:auto;color:#6c8fb2;font-size:18px}
+.bus-municipality[open] summary::after{content:'⌃'}
+.bus-municipality-items{border-top:1px solid #ebeff5;padding:0 12px}
+.bus-directory-terminal{display:flex;align-items:center;justify-content:space-between;gap:9px;min-width:0;padding:11px 0;border-bottom:1px solid #edf1f7}
+.bus-directory-terminal:last-child{border-bottom:0}
+.bus-directory-terminal-name{font-size:13px;line-height:1.45;font-weight:700;min-width:0;overflow-wrap:anywhere;color:#344c68}
+.bus-directory-actions{display:flex;flex:none;gap:6px}
+.bus-directory-pick{background:#eef5ff;color:#145ab4;border:1px solid #cfe2fb;border-radius:8px;padding:8px 10px;min-height:38px;font-size:12px;font-weight:800}
+.bus-directory-pick:last-child{background:#f1f7f4;color:#208364;border-color:#d1ebdf}
+.bus-region-picked{background:#f0f6ff;color:#275c8e;border-radius:9px;padding:10px 11px;margin:12px 0;font-size:12px;line-height:1.5;font-weight:700;overflow-wrap:anywhere}
+.bus-region-footnote{margin:0}
+.bus-region-empty{font-size:12px;color:#708398;line-height:1.6}
+@media(max-width:380px){.bus-region-toggle{padding:13px 12px}.bus-region-toggle-text strong{font-size:15px}.bus-region-panel{padding:12px 10px 15px}.bus-region-chips{gap:5px}.bus-region-chip{min-height:52px}.bus-directory-pick{padding:7px 8px}}
