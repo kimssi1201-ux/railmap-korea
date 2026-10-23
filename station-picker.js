@@ -13,6 +13,13 @@ export function stationPickerRegions(stations){
  }
  return [...RAIL_PROVINCES,'지역 확인 필요'].filter(r=>counts.has(r)).map(region=>({region,count:counts.get(region)}));
 }
+// Only officially returned stations are selectable. Corridor candidates are merely sorted first.
+export function destinationPickerMatches(stations,query='',region='',departure=null,candidates=[]){
+ const matches=stationPickerMatches(stations,query,region).filter(s=>s.id!==departure?.id);
+ if(normalizeName(query)||region||!candidates.length)return matches;
+ const ranks=new Map(candidates.map((s,i)=>[s.id,i]));
+ return matches.sort((a,b)=>(ranks.get(a.id)??Infinity)-(ranks.get(b.id)??Infinity));
+}
 export function stationPickerMatches(stations,query='',region=''){
  const q=normalizeName(query);
  return (Array.isArray(stations)?stations:[]).filter(s=>s?.id&&s.name&&(!region||stationPickerRegion(s)===region)&&(!q||normalizeName(s.name).includes(q)))
