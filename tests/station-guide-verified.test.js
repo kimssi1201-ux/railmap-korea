@@ -26,6 +26,6 @@ test('Yongsan station search is no longer restricted to two featured destination
  const html=stationDetailHtml(FEATURED_STATIONS.find(s=>s.name==='용산'));
  assert.match(html,/data-station-name="용산"/);
  assert.match(html,/예: 익산, 전주, 광주송정/);
- assert.match(html,/실제 직통 열차 시간표/);
+ assert.match(html,/공식 직통 열차 시간표/);
  assert.match(html,/환승편이 있을 수 있습니다/);
 });

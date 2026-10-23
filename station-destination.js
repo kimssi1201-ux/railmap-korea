@@ -90,9 +90,10 @@ if(app){
   }
   resetResults();
   const id=requestId;
-  controller=new AbortController();
-  const signal=controller.signal;
-  const timer=setTimeout(()=>controller?.abort(),18000);
+  const active=new AbortController();
+  controller=active;
+  const signal=active.signal;
+  const timer=setTimeout(()=>active.abort(),18000);
   submit.disabled=true;submit.textContent='공식 시간표 확인 중…';
   status.textContent=fromName+'역 → '+label(to)+' · 시간표 조회 중';
   status.dataset.status='';
