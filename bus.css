@@ -78,3 +78,22 @@
 .bus-region-footnote{margin:0}
 .bus-region-empty{font-size:12px;color:#708398;line-height:1.6}
 @media(max-width:380px){.bus-region-toggle{padding:13px 12px}.bus-region-toggle-text strong{font-size:15px}.bus-region-panel{padding:12px 10px 15px}.bus-region-chips{gap:5px}.bus-region-chip{min-height:52px}.bus-directory-pick{padding:7px 8px}}
+
+/* Timetable-first comparison UI; official API fields only. */
+.timetable-shell{background:#fff;border:1px solid #e2eaf4;border-radius:17px;overflow:hidden;box-shadow:0 6px 20px #1b35500b}
+.timetable-top{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:5px 12px;padding:14px 15px;background:#fbfdff;border-bottom:1px solid #e5edf7}
+.timetable-top strong{color:#183d64;font-size:14px}.timetable-top span{color:#74869a;font-size:11px;line-height:1.5}
+.timetable-scroll{width:100%;min-width:0;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.timetable-table{border-collapse:collapse;table-layout:fixed;width:100%;min-width:0;text-align:left;font-size:12px;color:#263e58}
+.timetable-table thead{background:#eff5ff}.timetable-table th{padding:13px 7px;font-size:11px;font-weight:800;color:#4e6684;text-align:left;white-space:nowrap}
+.timetable-table th:first-child{padding-left:13px;width:29%}.timetable-table th:nth-child(2){width:20%}.timetable-table th:nth-child(3){width:24%}.timetable-table th:last-child{width:27%}
+.timetable-table td{padding:13px 7px;border-top:1px solid #edf1f6;vertical-align:middle;overflow-wrap:anywhere}.timetable-table td:first-child{padding-left:12px}.timetable-table td:last-child{padding-right:9px}
+.timetable-table td.timetable-data:last-child{font-weight:700;color:#285273;font-size:11px}
+.timetable-toggle{padding:0;border:0;background:transparent;width:100%;min-width:0;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:1px 4px;color:#193b61;text-align:left}
+.timetable-toggle strong{font-size:13px;font-weight:900;line-height:1.45;white-space:nowrap}.timetable-toggle small{order:3;flex:0 0 100%;font-size:10px;color:#788da4;line-height:1.45;word-break:keep-all}
+.timetable-chevron{color:#82a3c9;font-size:15px;line-height:1;transition:transform .15s ease}.timetable-toggle[aria-expanded='true'] .timetable-chevron{transform:rotate(180deg)}
+.timetable-detail-row{background:#f7faff}.timetable-detail-row[hidden]{display:none}.timetable-detail-row td{padding:13px 15px!important}
+.timetable-detail-description{margin:0 0 11px;color:#5a7391;font-size:12px;line-height:1.5}.timetable-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.timetable-action{border:1px solid #b8d3f7;background:#eaf3ff;color:#175aa4;padding:9px 11px;border-radius:9px;font-size:11px;font-weight:800;white-space:nowrap;min-height:36px;display:inline-flex;align-items:center}
+.timetable-button{font-family:inherit;cursor:pointer}.timetable-caption{font-size:11px;color:#758a9f;padding:11px 15px 13px;margin:0;border-top:1px solid #edf1f6}
+@media(max-width:355px){.timetable-table{font-size:11px}.timetable-table td{padding:12px 5px}.timetable-table th{padding:12px 5px;font-size:10px}.timetable-table th:first-child{padding-left:9px}.timetable-table td:first-child{padding-left:9px}.timetable-toggle strong{font-size:12px}.timetable-table td.timetable-data:last-child{font-size:10px}}
