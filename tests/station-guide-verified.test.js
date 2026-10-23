@@ -34,7 +34,7 @@ test('Yongsan station search is no longer restricted to two featured destination
 test('station destination input has visible options container for nationwide lookups',()=>{
  const html=stationDetailHtml({id:'NAT999999',name:'광운대',region:'서울'});
  assert.match(html,/id="spDestinationOptions"/);
- assert.match(html,/limited-destination-picker-v3/);
+ assert.match(html,/rail-transfer-v1/);
  assert.ok(!html.includes('id="spLoadMoreRoutes"'));
 });
 

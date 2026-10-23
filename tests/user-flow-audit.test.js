@@ -64,3 +64,12 @@ test('regional rail-station directory is landing page; train form survives on de
  assert.match(search,/id="toInput"/);
  assert.match(search,/href="\/train.html" aria-current="page"/);
 });
+
+test('train timetable search displays true 1-transfer options when direct trains are not found',()=>{
+ const src=read('app.js'),page=read('train.html');
+ assert.match(src,/searchOneTransfer\(\{from,to,date,stations:state\.stations\}\)/);
+ assert.match(src,/renderTransferCards/);
+ assert.match(src,/state\.transferState==='searching'/);
+ assert.match(page,/app\.js\?v=rail-transfer-v1/);
+ assert.match(page,/station-pages\.css\?v=rail-transfer-v1/);
+});
