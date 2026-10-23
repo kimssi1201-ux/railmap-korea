@@ -76,3 +76,8 @@
 }
 .sp-lookup .sp-station-options-hint{position:sticky;top:0;z-index:1;background:#eaf3ff;font-weight:700}
 .sp-lookup .sp-station-options button{min-height:48px}
+
+/* Landing page: visible shortcut for travelers who know both station names. */
+.sp-landing-search-cta{margin:0 0 16px}
+.sp-landing-search-cta .sp-secondary-link{display:block;text-align:center;padding:13px 10px;font-size:13px;background:#2168e8;border-color:#2168e8;color:#fff}
+@media(max-width:400px){.sp-landing-search-cta .sp-secondary-link{font-size:12px}}

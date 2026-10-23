@@ -79,5 +79,5 @@ export function routeDetailHtml(from,to,{allowVerifiedPair=false}={}){
  return layout({path:routeUrl(from.id,to.id),title:`${fromName}역에서 ${toName}역 가는 기차 시간표·요금 | 레일맵`,description:`${name} 날짜별 KTX·SRT·일반열차 출발시간과 도착시간, 공식 데이터 제공 요금을 확인하세요.`,heading:`${name} 기차 시간표`,crumbs:[['홈','/'],['기차역 목록','/stations/'],[fromName+'역',stationUrl(from.id)],[toName+'행 시간표']],body,script:'/route-detail.js',noindex:true});
 }
 export function sitemapUrls(){
- return ['/','/stations/',...FEATURED_STATIONS.map(s=>stationUrl(s.id))];
+ return ['/','/train.html',...FEATURED_STATIONS.map(s=>stationUrl(s.id))];
 }

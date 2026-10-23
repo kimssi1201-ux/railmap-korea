@@ -6,7 +6,7 @@ test('popular train pair remains chosen for date search',()=>{
  const src=read('app.js');
  assert.match(src,/state\.destinationMode='all';refreshDestinations\(\{keepTo:true\}\)/);
  assert.match(src,/destinationMode:'all'/);
- assert.doesNotMatch(read('index.html'),/id="destinationModeToggle"/);
+ assert.doesNotMatch(read('train.html'),/id="destinationModeToggle"/);
  assert.match(src,/state\.selected\.to=oldTo;ui\.toInput\.value=oldTo\.name/);
 });
 test('city-bus search kind invalidates pending async results',()=>{
@@ -21,7 +21,7 @@ test('avoid duplicate full-search links and erroneous device-wide storage claims
 });
 
 test('train search keeps its accessible name without repeated visible heading',()=>{
- const html=read('index.html');
+ const html=read('train.html');
  assert.match(html,/<section class="search-card" aria-labelledby="searchTitle">/);
  assert.match(html,/<h2 id="searchTitle" class="sr-only">열차 검색<\/h2>/);
  assert.match(html,/<div class="card-head card-head-compact">/);
@@ -30,7 +30,7 @@ test('train search keeps its accessible name without repeated visible heading',(
 });
 
 test('nationwide train search removes the redundant explanation panel while keeping form controls',()=>{
- const html=read('index.html');
+ const html=read('train.html');
  assert.doesNotMatch(html,/destination-match-info/);
  assert.doesNotMatch(html,/id="destinationStatus"/);
  assert.doesNotMatch(html,/id="destinationMore"/);
@@ -49,4 +49,18 @@ test('train search logic tolerates physically removed destination help controls'
  assert.match(src,/ui\.destinationModeToggle\?\.addEventListener/);
  assert.match(src,/ui\.destinationMore\?\.addEventListener/);
  assert.match(read('styles.css'),/\.search-card \.date-block\{margin-top:15px\}/);
+});
+
+test('regional rail-station directory is landing page; train form survives on dedicated page',()=>{
+ const home=read('index.html'),search=read('train.html'),directory=read('stations/index.html');
+ assert.match(home,/<h1>전국 지역별 기차역 찾기<\/h1>/);
+ assert.match(home,/id="spNationwide"/);
+ assert.match(home,/id="spStationSearch"/);
+ assert.match(home,/href="\/train.html"/);
+ assert.match(home,/rel="canonical" href="https:\/\/railmap-korea.pages.dev\/"/);
+ assert.match(directory,/rel="canonical" href="https:\/\/railmap-korea.pages.dev\/"/);
+ assert.match(search,/id="searchForm"/);
+ assert.match(search,/id="fromInput"/);
+ assert.match(search,/id="toInput"/);
+ assert.match(search,/href="\/train.html" aria-current="page"/);
 });

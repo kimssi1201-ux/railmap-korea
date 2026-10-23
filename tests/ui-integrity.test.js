@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 const load=name=>readFileSync(new URL('../'+name,import.meta.url),'utf8');
-const screens=[['app.js','index.html'],['bus.js','bus.html'],['citybus.js','citybus.html']];
+const screens=[['app.js','train.html'],['bus.js','bus.html'],['citybus.js','citybus.html']];
 for(const [script,page] of screens){
  test(page+' has no duplicate HTML ids or missing JavaScript-mapped controls',()=>{
   const html=load(page),js=load(script),m=js.match(/Object\.fromEntries\(\[([\s\S]*?)\]\.map/);
