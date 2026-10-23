@@ -35,3 +35,8 @@
 
 /* Only validated timetable links are shown for a selected departure day. */
 .sp-date-check{display:grid;gap:7px;margin:13px 0}.sp-date-check label{font-size:12px;font-weight:750;color:#4b6482}.sp-date-check input{width:100%;border:1px solid #d4e2ef;border-radius:10px;padding:12px;font-size:16px;background:#fff;color:#243c59}.sp-verified-route[hidden]{display:none!important}
+
+.sp-search-other{margin-top:15px;background:#f3f7fd;border-radius:12px;padding:14px}
+.sp-search-other strong{font-size:13px;color:#284c76}
+.sp-search-other p{font-size:12px;line-height:1.6;color:#607c98;margin:7px 0 11px}
+#spVerifiedRoutes:empty{display:none}
