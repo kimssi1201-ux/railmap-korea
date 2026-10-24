@@ -36,7 +36,7 @@ const nav=`<nav class="transport-tabs" aria-label="교통수단 선택"><a href=
 const stationLink=(s,extra='')=>`<a class="sp-link" href="${stationUrl(s.id)}"><strong>${escapeHtml(baseStationName(s.name))}역</strong><small>${escapeHtml(extra||s.region)} · 역 정보 및 구간 조회</small><span aria-hidden="true">→</span></a>`;
 function layout({path,title,description,heading,crumbs,body,script='',noindex=false,compact=false}){
  const crumb=crumbs.map(([label,href])=>href?`<a href="${href}">${escapeHtml(label)}</a>`:`<span>${escapeHtml(label)}</span>`).join('<span aria-hidden="true">›</span>');
- return `<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#ffffff"><title>${escapeHtml(title)}</title><meta name="description" content="${escapeHtml(description)}"><link rel="canonical" href="${origin}${path}"><meta property="og:title" content="${escapeHtml(title)}"><meta property="og:description" content="${escapeHtml(description)}">${noindex?'<meta name="robots" content="noindex">':''}<link rel="stylesheet" href="/styles.css?v=audit-ux-v1"><link rel="stylesheet" href="/bus.css?v=audit-ux-v1"><link rel="stylesheet" href="/station-pages.css?v=national-station-match-v2">${script?`<script type="module" src="${script}?v=national-station-match-v2"></script>`:''}</head><body><div class="app"><header class="site-header"><a class="logo" href="/" aria-label="레일맵 홈"><span class="logo-icon" aria-hidden="true">🚆</span><span>RAIL<span>MAP</span></span></a><a class="sp-header-link" href="/train.html">열차 시간표</a></header><main class="content sp-content">${nav}<div class="sp-breadcrumb" aria-label="현재 위치">${crumb}</div><section class="sp-hero${compact?' sp-hero-compact':''}"><div class="sp-eyebrow">RAILMAP · 전국 철도 안내</div><h1>${escapeHtml(heading)}</h1>${compact?'':`<p>${escapeHtml(description)}</p>`}</section>${body}</main><footer class="footer"><span>© RAILMAP</span><div><a href="/train.html">시간표 검색</a><a href="https://www.korail.com/" target="_blank" rel="noopener noreferrer">코레일 공식</a><a href="https://etk.srail.kr/main.do" target="_blank" rel="noopener noreferrer">SRT 공식</a></div></footer></div></body></html>`;
+ return `<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#ffffff"><title>${escapeHtml(title)}</title><meta name="description" content="${escapeHtml(description)}"><link rel="canonical" href="${origin}${path}"><meta property="og:title" content="${escapeHtml(title)}"><meta property="og:description" content="${escapeHtml(description)}">${noindex?'<meta name="robots" content="noindex">':''}<link rel="stylesheet" href="/styles.css?v=audit-ux-v1"><link rel="stylesheet" href="/bus.css?v=audit-ux-v1"><link rel="stylesheet" href="/station-pages.css?v=verified-shortlist-v1">${script?`<script type="module" src="${script}?v=verified-shortlist-v1"></script>`:''}</head><body><div class="app"><header class="site-header"><a class="logo" href="/" aria-label="레일맵 홈"><span class="logo-icon" aria-hidden="true">🚆</span><span>RAIL<span>MAP</span></span></a><a class="sp-header-link" href="/train.html">열차 시간표</a></header><main class="content sp-content">${nav}<div class="sp-breadcrumb" aria-label="현재 위치">${crumb}</div><section class="sp-hero${compact?' sp-hero-compact':''}"><div class="sp-eyebrow">RAILMAP · 전국 철도 안내</div><h1>${escapeHtml(heading)}</h1>${compact?'':`<p>${escapeHtml(description)}</p>`}</section>${body}</main><footer class="footer"><span>© RAILMAP</span><div><a href="/train.html">시간표 검색</a><a href="https://www.korail.com/" target="_blank" rel="noopener noreferrer">코레일 공식</a><a href="https://etk.srail.kr/main.do" target="_blank" rel="noopener noreferrer">SRT 공식</a></div></footer></div></body></html>`;
 }
 export function stationIndexHtml(){
  const provinces=RAIL_PROVINCES.map(region=>`<button type="button" class="sp-province-chip" data-province="${region}" aria-pressed="false">${region}</button>`).join('');
@@ -49,20 +49,19 @@ export function stationDetailHtml(s){
  const featured=Boolean(stationById(s.id));
  const body=`<section class="sp-card sp-lookup" id="spStationLookup" data-station="${escapeHtml(s.id)}" data-station-name="${escapeHtml(name)}">
   <div class="sp-station-meta"><strong>${escapeHtml(name)}역</strong><span>${escapeHtml(s.region&&s.region!=='지역 확인 필요'?s.region+' · ':'')}TAGO 등록역</span></div>
-  <p class="sp-lookup-intro">도착역과 날짜를 선택해 공식 직통 시간표를 조회하세요.</p>
+  <p class="sp-lookup-intro">날짜를 고르면 실제 직통편이 확인된 후보역을 안내합니다. 원하는 역 이름도 직접 검색할 수 있습니다.</p>
   <form id="spStationForm" class="sp-station-form" autocomplete="off">
    <label for="spCheckDate">가는 날짜</label>
    <input id="spCheckDate" type="date" required>
    <label for="spDestinationInput">도착역</label>
    <div class="sp-station-picker">
-    <input id="spDestinationInput" type="search" placeholder="예: 익산, 전주, 광주송정" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="spDestinationOptions" autocapitalize="off" required>
+    <input id="spDestinationInput" type="search" placeholder="역 이름 입력 또는 확인된 직통역 선택" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="spDestinationOptions" autocapitalize="off" required>
     <div id="spDestinationOptions" class="sp-station-options" role="listbox" hidden></div>
    </div>
    <p id="spStationListStatus" class="sp-station-list-status" role="status">전국 역 목록을 불러오는 중입니다.</p>
    <button id="spStationSubmit" class="sp-station-submit" type="submit">시간표 확인하기 →</button>
   </form>
   <p id="spStationResultStatus" class="sp-result-status" role="status" aria-live="polite"></p>
-  <div id="spVerifiedAlternatives" class="sp-verified-alternatives" hidden></div>
   <div id="spStationResults" class="sp-station-results" hidden></div>
   <p class="sp-disclaimer">직통 운행정보만 표시합니다. 환승 경로·좌석·운행 변경은 공식 예매처에서 확인하세요.</p>
   <div class="sp-external"><a href="https://www.korail.com/" target="_blank" rel="noopener noreferrer">코레일 ↗</a><a href="https://etk.srail.kr/main.do" target="_blank" rel="noopener noreferrer">SRT ↗</a></div>
