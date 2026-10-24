@@ -27,7 +27,7 @@ test('Yongsan station search is no longer restricted to two featured destination
  const html=stationDetailHtml(FEATURED_STATIONS.find(s=>s.name==='용산'));
  assert.match(html,/data-station-name="용산"/);
  assert.match(html,/역 이름 입력 또는 확인된 직통역 선택/);
- assert.match(html,/공식 직통 시간표를 조회하세요/);
+ assert.match(html,/실제 직통편이 확인된 후보역을 안내합니다/);
  assert.match(html,/환승 경로·좌석·운행 변경은 공식 예매처에서 확인하세요/);
 });
 
