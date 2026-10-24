@@ -53,7 +53,7 @@ export async function loadAllStations(env){
  return {stations:final,matching:stationMatchingAudit(final),partial:failedCodes.length>0||missingPages||supplemented.length>0,failedRegions:failedCodes.length,supplemented,source:'국토교통부 TAGO'};
 }
 export async function getCachedStationList(env,request){
- const key=new Request(new URL('/api/stations?v=nationwide-regions-v1',request.url).toString());
+ const key=new Request(new URL('/api/stations?v=national-station-match-v2',request.url).toString());
  const cache=typeof caches==='undefined'?null:caches.default;
  if(cache){const hit=await cache.match(key);if(hit){try{const value=await hit.json();if(value?.ok&&Array.isArray(value.stations))return value}catch{}}}
  const data={ok:true,...await loadAllStations(env)};
