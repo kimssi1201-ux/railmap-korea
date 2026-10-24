@@ -81,6 +81,7 @@ if(app){
    hint.textContent=verified.state==='checking'?'선택한 날짜의 직통 목적지를 공식 시간표로 확인 중…':
     matches.length?'후보 '+verified.checked+'곳 중 직통 '+matches.length+'곳 확인 · 전체 직통 목적지는 아닙니다.':
     verified.state==='failed'?'직통 목적지 조회가 지연됐습니다. 역 이름을 입력해 개별 조회하세요.':
+    verified.failed||verified.unknown?.length?'후보 조회 중 일부 실패·날짜 불일치 · 역 이름으로 직접 확인하세요':
     verified.candidates?'확인한 후보 '+verified.checked+'곳에서 직통편 미확인 · 역 이름 직접 검색 가능':
     '추천 후보가 없습니다. 도착역 이름을 입력해 직접 확인하세요.';
   }else{
@@ -145,7 +146,7 @@ if(app){
     if(data.partial||data.trains.length){
      status.textContent='역 코드는 정상 매칭됐지만 공식 시간표 응답이 불완전하거나 날짜가 맞지 않습니다. 코레일에서 다시 확인해 주세요.';
     }else{
-     status.textContent=label(to)+'은(는) 공식 등록역입니다. 다만 '+date+' 출발역에 따라 직통편이 없는 경우가 있습니다. '+fromName+'역 → '+label(to)+' 직통 시간표 미확인 · 환승편은 코레일에서 확인해 주세요.';
+     status.textContent=fromName+'역 → '+label(to)+'은 공식 역 코드로 정상 매칭됐습니다. 다만 '+date+' 직통 운행 시간표는 확인되지 않았습니다. 환승 경로는 코레일에서 확인해 주세요.';
     }
     status.dataset.status='warning';return;
    }
