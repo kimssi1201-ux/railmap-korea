@@ -19,7 +19,8 @@ export function destinationPickerMatches(stations,query='',region='',departure=n
  const matches=stationPickerMatches(stations,query,region).filter(s=>s.id!==departure?.id);
  if(normalizeName(query)||region)return matches.slice(0,20);
  const preferred=departure?suggestedRegisteredStations(departure,matches,12).stations:[];
- const order=new Map([...preferred,...candidates].map((s,i)=>[s.id,i]));
+ const order=new Map();
+ [...candidates,...preferred].forEach((s,i)=>{if(s?.id&&!order.has(s.id))order.set(s.id,i)});
  return matches.sort((a,b)=>(order.get(a.id)??Infinity)-(order.get(b.id)??Infinity)).slice(0,12);
 }
 export function stationPickerMatches(stations,query='',region=''){
