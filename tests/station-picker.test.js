@@ -23,7 +23,7 @@ test('초기 도착역은 12개만 표시하고 공식역 전체는 이름으로
  const r=Array.from({length:330},(_,i)=>({id:'NAT'+i,name:'역'+String(i).padStart(3,'0'),region:'경기'}));
  const suggestions=destinationPickerMatches(r,'','',r[0],[r[5],r[2],r[5]]);
  assert.equal(suggestions.length,12);
- assert.equal(destinationPickerMatches(r,'역','',r[0]).length,20);
+ assert.equal(destinationPickerMatches(r,'역0','',r[0]).length,20);
  assert.equal(stationPickerMatches(r,'역').length,330);
  assert.deepEqual(suggestions.slice(0,2).map(x=>x.id),[r[5].id,r[2].id]);
  assert.ok(!suggestions.some(x=>x.id===r[0].id));
