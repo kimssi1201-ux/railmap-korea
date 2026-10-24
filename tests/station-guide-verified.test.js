@@ -44,7 +44,7 @@ test('station detail keeps one direct timetable search and does not auto-load tr
  const js=readFileSync(new URL('../station-destination.js',import.meta.url),'utf8');
  assert.doesNotMatch(js,/searchOneTransfer/);
  assert.doesNotMatch(js,/renderTransferCards/);
- assert.match(js,/직통 시간표가 확인되지 않았습니다/);
+ assert.match(js,/직통 시간표 미확인/);
 });
 
 test('역 페이지는 주변 역을 직통 대안으로 확정할 때 공식 배차 응답을 검증한다',()=>{
