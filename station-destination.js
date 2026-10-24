@@ -1,5 +1,5 @@
 import {renderTrainTimetable} from './timetable-view.js';
-import {stationGuideOptions,stationGuideOptionCount,stationGuideNearby,stationGuideMode} from './station-destination-options.js';
+import {stationGuideOptions,stationGuideOptionCount,stationGuideNearby,stationGuideMode} from './station-destination-options.js?v=national-station-match-v2';
 import {lookupRegisteredStation} from './station-matching.js';
 import {getStation,normalizeName} from './station-utils.js';
 
@@ -168,7 +168,7 @@ if(app){
  }
  form.addEventListener('submit',lookup);
  submit.disabled=true;
- fetch('/api/stations?v=nationwide-regions-v1',{headers:{Accept:'application/json'}})
+ fetch('/api/stations?v=national-station-match-v2',{headers:{Accept:'application/json'}})
  .then(async response=>{
   const data=await response.json();
   if(!response.ok||!data.ok||!Array.isArray(data.stations))throw Error(data.error||'공식 역 목록 조회 오류');
