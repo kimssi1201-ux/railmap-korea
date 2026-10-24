@@ -27,7 +27,7 @@ test('초기 도착역은 12개만 표시하고 공식역 전체는 이름으로
  assert.equal(stationPickerMatches(r,'역').length,330);
  assert.deepEqual(suggestions.slice(0,2).map(x=>x.id),[r[5].id,r[2].id]);
  assert.ok(!suggestions.some(x=>x.id===r[0].id));
- assert.equal(new Set(suggestions.map(x=>x.id)).size,329);
+ assert.equal(new Set(suggestions.map(x=>x.id)).size,12);
 });
 test('도착역 이름 검색·시도 필터는 후보 우선순위보다 검색 결과를 존중한다',()=>{
  const r=[{id:'a',name:'서울',region:'서울'},{id:'b',name:'부산',region:'부산'},{id:'c',name:'서대전',region:'대전'},{id:'d',name:'서원주',region:'강원'}];
