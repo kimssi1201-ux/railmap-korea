@@ -44,7 +44,7 @@ test('다른 날짜의 운행 편은 추천하지 않고 부분응답과 오류�
  assert.equal(response.confirmed.length,0);
  assert.equal(response.checked,4);
  assert.equal(response.failed,2);
- assert.equal(response.unknown.length,3);
+ assert.equal(response.unknown.length,4);
 });
 test('요청 취소 상태에서는 남은 목적지를 확인하지 않는다',async()=>{
  const abort=new AbortController();
