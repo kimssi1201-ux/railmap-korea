@@ -34,15 +34,25 @@ test('Yongsan station search is no longer restricted to two featured destination
 test('station destination input has visible options container for nationwide lookups',()=>{
  const html=stationDetailHtml({id:'NAT999999',name:'광운대',region:'서울'});
  assert.match(html,/id="spDestinationOptions"/);
- assert.match(html,/rail-simple-v1/);
+ assert.match(html,/rail-match-v2/);
  assert.ok(!html.includes('id="spLoadMoreRoutes"'));
 });
 
 test('station detail keeps one direct timetable search and does not auto-load transfer connections',()=>{
  const html=stationDetailHtml(FEATURED_STATIONS[0]);
- assert.match(html,/rail-simple-v1/);
+ assert.match(html,/rail-match-v2/);
  const js=readFileSync(new URL('../station-destination.js',import.meta.url),'utf8');
  assert.doesNotMatch(js,/searchOneTransfer/);
  assert.doesNotMatch(js,/renderTransferCards/);
  assert.match(js,/직통 시간표가 확인되지 않았습니다/);
+});
+
+test('역 페이지는 주변 역을 직통 대안으로 확정할 때 공식 배차 응답을 검증한다',()=>{
+ const html=stationDetailHtml(FEATURED_STATIONS[0]);
+ assert.match(html,/id="spVerifiedAlternatives"/);
+ const js=readFileSync(new URL('../station-destination.js',import.meta.url),'utf8');
+ assert.match(js,/stationGuideNearby/);
+ assert.match(js,/const responses=await Promise\.all/);
+ assert.match(js,/const count=payload\.trains\.filter/);
+ assert.match(js,/const verified=responses\.filter\(Boolean\)/);
 });
