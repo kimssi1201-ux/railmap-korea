@@ -19,10 +19,12 @@ test('지역 미분류 역도 전체 검색에서 사라지지 않는다',()=>{
  assert.equal(stationPickerRegions(stations).some(r=>r.region==='지역 확인 필요'),true);
 });
 
-test('도착역 기본 목록은 네 후보에 제한되지 않고 모든 공식 역을 포함한다',()=>{
+test('초기 도착역은 12개만 표시하고 공식역 전체는 이름으로 찾을 수 있다',()=>{
  const r=Array.from({length:330},(_,i)=>({id:'NAT'+i,name:'역'+String(i).padStart(3,'0'),region:'경기'}));
  const suggestions=destinationPickerMatches(r,'','',r[0],[r[5],r[2],r[5]]);
- assert.equal(suggestions.length,329);
+ assert.equal(suggestions.length,12);
+ assert.equal(destinationPickerMatches(r,'역','',r[0]).length,20);
+ assert.equal(stationPickerMatches(r,'역').length,330);
  assert.deepEqual(suggestions.slice(0,2).map(x=>x.id),[r[5].id,r[2].id]);
  assert.ok(!suggestions.some(x=>x.id===r[0].id));
  assert.equal(new Set(suggestions.map(x=>x.id)).size,329);
