@@ -1,7 +1,8 @@
 import {renderTrainTimetable} from './timetable-view.js';
-import {stationGuideOptions,stationGuideOptionCount,stationGuideNearby,stationGuideMode} from './station-destination-options.js?v=national-station-match-v2';
+import {stationGuideSearch,stationGuideOptionCount} from './station-destination-options.js?v=verified-shortlist-v1';
+import {verifyStationDestinations} from './station-verified.js';
 import {lookupRegisteredStation} from './station-matching.js';
-import {getStation,normalizeName} from './station-utils.js';
+import {normalizeName} from './station-utils.js';
 
 const app=document.getElementById('spStationLookup');
 if(app){
@@ -14,62 +15,93 @@ if(app){
  const submit=document.getElementById('spStationSubmit');
  const status=document.getElementById('spStationResultStatus');
  const results=document.getElementById('spStationResults');
- const alternatives=document.getElementById('spVerifiedAlternatives');
- let official=[],chosen=null,requestId=0,controller=null,loaded=false;
+ let official=[],chosen=null,requestId=0,controller=null,loaded=false,verifySequence=0,verifyAbort=null;
+ let verified={date:'',state:'idle',confirmed:[],checked:0,candidates:0,failed:0};
  const today=(offset=0)=>{
   const parts=Object.fromEntries(new Intl.DateTimeFormat('en-US',{timeZone:'Asia/Seoul',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date()).map(x=>[x.type,x.value]));
   return new Date(Date.UTC(+parts.year,+parts.month-1,+parts.day+offset)).toISOString().slice(0,10);
  };
  dateInput.min=today();dateInput.max=today(31);dateInput.value=dateInput.min;
-
  const label=station=>String(station.name).replace(/역$/u,'')+'역';
  function hideOptions(){options.hidden=true;input.setAttribute('aria-expanded','false');}
  function resetResults(){
-  requestId++;
-  controller?.abort();controller=null;
+  requestId++;controller?.abort();controller=null;
   submit.disabled=!loaded;submit.textContent='시간표 확인하기 →';
   status.textContent='';status.dataset.status='';
   results.hidden=true;results.replaceChildren();
-  if(alternatives){alternatives.hidden=true;alternatives.replaceChildren();}
+ }
+ function resetVerified(){
+  verifySequence++;verifyAbort?.abort();verifyAbort=null;
+  verified={date:'',state:'idle',confirmed:[],checked:0,candidates:0,failed:0};
+ }
+ async function getTimetable({from:origin,to,date,signal}){
+  const url=new URL('/api/trains',location.origin);
+  for(const [key,value] of Object.entries({from:origin,to,date}))url.searchParams.set(key,value);
+  const response=await fetch(url.toString(),{signal,headers:{Accept:'application/json'}});
+  const data=await response.json();
+  if(!response.ok||data?.ok!==true||!Array.isArray(data.trains))throw Error(data?.error||'공식 시간표 조회 실패');
+  return data;
+ }
+ function startVerification(){
+  if(!loaded||!dateInput.value||dateInput.value<today()||dateInput.value>today(31))return;
+  if(verified.date===dateInput.value&&verified.state!=='idle')return;
+  resetVerified();
+  const token=verifySequence,date=dateInput.value;
+  const active=new AbortController();verifyAbort=active;
+  verified={date,state:'checking',confirmed:[],checked:0,candidates:0,failed:0};
+  const timeout=setTimeout(()=>active.abort(),25000);
+  verifyStationDestinations({origin:{id:from,name:fromName},stations:official,date,signal:active.signal,request:getTimetable,limit:8})
+   .then(data=>{
+    if(token!==verifySequence)return;
+    verified={date,state:'done',...data};
+   }).catch(()=>{
+    if(token!==verifySequence)return;
+    verified={date,state:'failed',confirmed:[],checked:0,candidates:0,failed:1};
+   }).finally(()=>{
+    clearTimeout(timeout);
+    if(token===verifySequence){
+     verifyAbort=null;
+     if(document.activeElement===input&&!input.value.trim())showOptions();
+    }
+   });
  }
  function selectStation(station){
-  chosen=station;input.value=station.name;
-  hideOptions();input.blur();resetResults();
+  chosen=station;input.value=station.name;hideOptions();input.blur();resetResults();
  }
- function suggest(){
-  const query=input.value.trim();
-  const origin={id:from,name:fromName};
-  const matches=stationGuideOptions(origin,official,query);
-  const total=stationGuideOptionCount(origin,official,query);
-  options.replaceChildren();
+ function showOptions(){
   if(!loaded){hideOptions();return;}
-  if(!matches.length){
-   const empty=document.createElement('div');empty.className='sp-station-options-empty';
-   empty.textContent=query?'일치하는 공식 역이 없습니다. 다른 역 이름을 입력해 주세요.':'조회 가능한 도착역이 없습니다.';
-   options.append(empty);
+  const query=input.value.trim(),empty=!query;
+  if(empty)startVerification();
+  const matches=empty?verified.confirmed.map(x=>x.station):
+   stationGuideSearch(official,from,query,10);
+  const checked=new Map(verified.confirmed.map(x=>[x.station.id,x.count]));
+  options.replaceChildren();
+  const hint=document.createElement('p');hint.className='sp-station-options-hint';
+  if(empty){
+   hint.textContent=verified.state==='checking'?'선택한 날짜의 직통 목적지를 공식 시간표로 확인 중…':
+    matches.length?'후보 '+verified.checked+'곳 중 직통 '+matches.length+'곳 확인 · 전체 직통 목적지는 아닙니다.':
+    verified.state==='failed'?'직통 목적지 조회가 지연됐습니다. 역 이름을 입력해 개별 조회하세요.':
+    verified.candidates?'확인한 후보 '+verified.checked+'곳에서 직통편 미확인 · 역 이름 직접 검색 가능':
+    '추천 후보가 없습니다. 도착역 이름을 입력해 직접 확인하세요.';
   }else{
-   const hint=document.createElement('p');
-   hint.className='sp-station-options-hint';
-   const mode=stationGuideMode(origin,official);
-   hint.textContent=query?'등록된 역 '+total+'개 중 '+matches.length+'개 · 직통 여부는 시간표 조회 후 확인':
-    (mode==='corridor'?'철도 노선 참고 역 ':mode==='region'?'같은 지역 등록역 ':'전국 등록역 예시 ')+matches.length+'곳 · 직통 운행은 미확인';
-   options.append(hint);
-   for(const station of matches){
-    const button=document.createElement('button');button.type='button';button.setAttribute('role','option');
-    const stationName=document.createElement('strong');stationName.textContent=label(station);
-    const region=document.createElement('small');region.textContent=station.region||'공식 등록역';
-    button.append(stationName,region);
-    button.addEventListener('click',()=>selectStation(station));
-    options.append(button);
-   }
+   const total=stationGuideOptionCount({id:from,name:fromName},official,query);
+   hint.textContent='등록역 '+total+'곳 중 '+matches.length+'곳 표시 · 직통 운행은 확인 후 표시';
+  }
+  options.append(hint);
+  for(const station of matches){
+   const button=document.createElement('button');button.type='button';button.setAttribute('role','option');
+   const heading=document.createElement('strong');heading.textContent=label(station);
+   const info=document.createElement('small');
+   info.textContent=checked.has(station.id)?'직통 '+checked.get(station.id)+'편 확인':station.region||'공식 등록역';
+   button.append(heading,info);
+   button.addEventListener('click',()=>selectStation(station));
+   options.append(button);
   }
   options.hidden=false;options.scrollTop=0;input.setAttribute('aria-expanded','true');
  }
- input.addEventListener('focus',suggest);
- input.addEventListener('click',suggest);
- input.addEventListener('input',()=>{
-  chosen=null;resetResults();suggest();
- });
+ input.addEventListener('focus',showOptions);
+ input.addEventListener('click',showOptions);
+ input.addEventListener('input',()=>{chosen=null;resetResults();showOptions();});
  input.addEventListener('keydown',event=>{
   if(event.key==='Escape'){hideOptions();return;}
   if(event.key==='Enter'&&!options.hidden){
@@ -80,86 +112,51 @@ if(app){
  document.addEventListener('pointerdown',event=>{
   if(!event.target.closest('.sp-station-picker'))hideOptions();
  });
- dateInput.addEventListener('change',resetResults);
+ dateInput.addEventListener('change',()=>{
+  resetResults();resetVerified();
+  listStatus.textContent='날짜를 바꿨습니다. 직통 목적지는 새 날짜로 다시 확인합니다.';
+  if(document.activeElement===input)showOptions();
+ });
  async function lookup(event){
   event.preventDefault();hideOptions();
-  if(!loaded){status.textContent='공식 역 목록을 불러오지 못했습니다. 다시 접속해 주세요.';status.dataset.status='error';return;}
+  if(!loaded){status.textContent='공식 역 목록을 불러오지 못했습니다.';status.dataset.status='error';return;}
   const resolved=lookupRegisteredStation(official,input.value);
   const to=chosen&&normalizeName(chosen.name)===normalizeName(input.value)?chosen:resolved.station;
   if(!to||to.id===from){
-   status.textContent=resolved.ambiguous?'이름이 같은 역이 여러 곳입니다. 아래 목록에서 지역을 확인하고 선택해 주세요.':
-    '공식 목록에서 출발역과 다른 도착역을 선택해 주세요.';
+   status.textContent=resolved.ambiguous?'동명이역이 있습니다. 목록에서 지역을 보고 선택해 주세요.':'공식 역 목록에서 다른 도착역을 선택해 주세요.';
    status.dataset.status='error';input.focus();return;
   }
   const date=dateInput.value;
   if(!date||date<today()||date>today(31)){
-   status.textContent='오늘부터 31일 이내 날짜를 선택해 주세요.';
-   status.dataset.status='error';return;
+   status.textContent='오늘부터 31일 이내의 날짜를 선택해 주세요.';status.dataset.status='error';return;
   }
   resetResults();
-  const id=requestId;
-  const active=new AbortController();
-  controller=active;
-  const signal=active.signal;
-  const timer=setTimeout(()=>active.abort(),24000);
+  const id=requestId,active=new AbortController();controller=active;
+  const timer=setTimeout(()=>active.abort(),17000),signal=active.signal;
   submit.disabled=true;submit.textContent='공식 시간표 확인 중…';
-  status.textContent=fromName+'역 → '+label(to)+' · 시간표 조회 중';
-  status.dataset.status='';
+  status.textContent=fromName+'역 → '+label(to)+' · 직통 시간표 조회 중';
   try{
-   const url=new URL('/api/trains',location.origin);
-   for(const [key,value] of Object.entries({from,to:to.id,date}))url.searchParams.set(key,value);
-   const response=await fetch(url.toString(),{signal,headers:{Accept:'application/json'}});
-   const data=await response.json();
+   const data=await getTimetable({from,to:to.id,date,signal});
    if(id!==requestId)return;
-   if(!response.ok||!data.ok||!Array.isArray(data.trains))throw Error(data.error||'공식 열차정보를 조회하지 못했습니다.');
-   const trains=data.trains.filter(row=>/^\d{12,14}$/.test(String(row.depTime))&&/^\d{12,14}$/.test(String(row.arrTime)));
+   const expectedDate=date.replaceAll('-','');
+   const trains=data.trains.filter(row=>/^\d{12,14}$/.test(String(row?.depTime))&&
+    /^\d{12,14}$/.test(String(row?.arrTime))&&String(row.depTime).slice(0,8)===expectedDate);
    if(!trains.length){
-    status.dataset.status='warning';
-    if(data.partial){
-     status.textContent='공식 시간표 일부 누락 · 직통 여부를 확정할 수 없습니다. 코레일에서 확인해 주세요.';
-     return;
-    }
-    const nearby=stationGuideNearby({id:from,name:fromName},official,3).filter(station=>station.id!==to.id);
-    status.textContent=label(to)+' 직통 시간표 미확인'+(nearby.length?' · 같은 노선의 실제 배차 확인 중…':' · 환승편은 코레일에서 확인하세요.');
-    if(!nearby.length)return;
-    const responses=await Promise.all(nearby.map(async station=>{
-     try{
-      const altUrl=new URL('/api/trains',location.origin);
-      for(const [key,value] of Object.entries({from,to:station.id,date}))altUrl.searchParams.set(key,value);
-      const response=await fetch(altUrl.toString(),{signal,headers:{Accept:'application/json'}});
-      const payload=await response.json();
-      if(!response.ok||payload?.ok!==true||!Array.isArray(payload.trains))return null;
-      const count=payload.trains.filter(row=>/^\d{12,14}$/.test(String(row.depTime))&&/^\d{12,14}$/.test(String(row.arrTime))).length;
-      return count?{station,count}:null;
-     }catch{return null}
-    }));
-    if(id!==requestId)return;
-    const verified=responses.filter(Boolean);
-    if(verified.length&&alternatives){
-     alternatives.hidden=false;
-     const heading=document.createElement('strong');
-     heading.textContent='이 날짜에 직통편이 확인된 주변 역';
-     alternatives.append(heading);
-     for(const {station,count} of verified){
-      const btn=document.createElement('button');btn.type='button';btn.className='sp-alternative-button';
-      btn.textContent=label(station)+' · '+count+'편';
-      btn.addEventListener('click',()=>{selectStation(station);form.requestSubmit()});
-      alternatives.append(btn);
-     }
-     status.textContent=label(to)+' 직통편 미확인 · 아래는 TAGO에서 직접 배차가 확인된 주변 역입니다. 다른 환승 경로는 공식 예매처에서 확인하세요.';
+    if(data.partial||data.trains.length){
+     status.textContent='역 코드는 정상 매칭됐지만 공식 시간표 응답이 불완전하거나 날짜가 맞지 않습니다. 코레일에서 다시 확인해 주세요.';
     }else{
-     status.textContent=label(to)+' 직통편 미확인 · 인접 후보역에서도 확정된 배차를 받지 못했습니다. 환승 경로가 없다는 뜻은 아닙니다.';
+     status.textContent=label(to)+'은(는) 공식 등록역입니다. 다만 '+date+' 출발역에 따라 직통편이 없는 경우가 있습니다. '+fromName+'역 → '+label(to)+' 직통 시간표 미확인 · 환승편은 코레일에서 확인해 주세요.';
     }
-    return;
+    status.dataset.status='warning';return;
    }
    renderTrainTimetable(results,trains,{from:fromName,to:to.name,date});
-   results.hidden=false;results.scrollIntoView({block:'nearest',behavior:'smooth'});
+   results.hidden=false;
    status.textContent=date+' · '+fromName+'역 → '+label(to)+' · 직통 '+trains.length+'편 확인'+(data.partial?' (일부 시간표 누락 가능)':'');
    status.dataset.status=data.partial?'warning':'ok';
   }catch(error){
    if(id!==requestId)return;
-   status.textContent=signal.aborted?'공식 시간표 서버 응답이 지연됐습니다. 다시 조회해 주세요.':
-    (error.message||'시간표를 조회하지 못했습니다.')+' 운행이 없다는 뜻은 아닙니다.';
+   status.textContent=signal.aborted?'공식 시간표 응답이 지연됐습니다. 잠시 후 다시 확인해 주세요.':
+    (error.message||'시간표 조회 실패')+' · 직통편이 없다는 뜻은 아닙니다.';
    status.dataset.status='error';
   }finally{
    clearTimeout(timer);
@@ -169,17 +166,15 @@ if(app){
  form.addEventListener('submit',lookup);
  submit.disabled=true;
  fetch('/api/stations?v=national-station-match-v2',{headers:{Accept:'application/json'}})
- .then(async response=>{
-  const data=await response.json();
-  if(!response.ok||!data.ok||!Array.isArray(data.stations))throw Error(data.error||'공식 역 목록 조회 오류');
-  official=[...new Map(data.stations.filter(s=>s&&typeof s.id==='string'&&typeof s.name==='string'&&s.id!==from).map(s=>[s.id,s])).values()];
-  if(!official.length)throw Error('조회 가능한 도착역 목록이 없습니다.');
-  loaded=true;submit.disabled=false;
-  listStatus.textContent='도착역 '+official.length+'곳 검색 가능'+(data.partial?' · 일부 역 정보 누락 가능':'');
-  if(document.activeElement===input)suggest();
- })
- .catch(error=>{
-  loaded=false;submit.disabled=true;
-  listStatus.textContent=(error.message||'공식 역 목록 오류')+' · 전체 기차 검색에서 다시 확인해 주세요.';
- });
+  .then(async response=>{
+   const data=await response.json();
+   if(!response.ok||!data.ok||!Array.isArray(data.stations))throw Error(data.error||'공식 역 목록 조회 실패');
+   official=[...new Map(data.stations.filter(s=>s?.id&&s?.name&&s.id!==from).map(s=>[s.id,s])).values()];
+   if(!official.length)throw Error('등록된 도착역 목록이 비어 있습니다.');
+   loaded=true;submit.disabled=false;
+   listStatus.textContent='전국 등록역 '+official.length+'곳 · 직접 검색 또는 날짜별 직통 목적지 확인';
+   if(document.activeElement===input)showOptions();
+  }).catch(error=>{
+   loaded=false;submit.disabled=true;listStatus.textContent=(error.message||'역 목록 오류')+' · 다시 접속해 주세요.';
+  });
 }
