@@ -99,3 +99,9 @@
 .sp-station-meta span{color:#71849b;font-size:12px}
 .sp-lookup .sp-lookup-intro{margin-bottom:14px;font-size:12px}
 .sp-lookup .sp-station-form{gap:8px}
+
+/* Direct-service confirmed nearby alternatives appear only after a zero-direct lookup. */
+.sp-verified-alternatives[hidden]{display:none!important}
+.sp-verified-alternatives{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 16px}
+.sp-verified-alternatives>strong{width:100%;font-size:12px;color:#3f5878}
+.sp-alternative-button{font-size:13px;font-weight:750;border:1px solid #b9cee9;border-radius:9px;color:#235d9b;background:#eff6ff;padding:10px 13px;min-height:42px}
