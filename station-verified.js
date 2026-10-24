@@ -28,7 +28,8 @@ export async function verifyStationDestinations({origin,stations,date,request,si
     if(data?.ok!==true||!Array.isArray(data.trains))throw Error('invalid provider response');
     const count=data.trains.filter(t=>/^\d{12,14}$/.test(String(t?.depTime))&&
       /^\d{12,14}$/.test(String(t?.arrTime))&&String(t.depTime).slice(0,8)===datePrefix).length;
-    return {station,count,partial:!!data.partial};
+    // A date-mismatched provider response must never be treated as confirmed absence.
+    return {station,count,partial:!!data.partial||(data.trains.length>0&&count===0)};
    }catch{return {station,failed:true}}
   }));
   if(signal?.aborted)break;
