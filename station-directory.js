@@ -30,5 +30,5 @@ if(area){
  more.addEventListener('click',()=>{limit+=12;render()});
  fetch('/api/stations?v=nationwide-regions-v1',{headers:{Accept:'application/json'}})
  .then(async res=>{const body=await res.json();if(!res.ok||!body.ok||!Array.isArray(body.stations))throw Error(body.error||'전국 기차역 정보를 가져오지 못했습니다.');groups=categorizedStations(body.stations);stations=Object.values(groups).flat().sort((a,b)=>a.name.localeCompare(b.name,'ko'));partial=!!body.partial;render()})
- .catch(err=>{status.textContent=err.message+' 아래 주요역 바로가기는 계속 이용할 수 있습니다.';more.hidden=true});
+ .catch(err=>{status.textContent=err.message+' 역 목록을 다시 불러오려면 페이지를 새로고침해 주세요.';more.hidden=true});
 }
