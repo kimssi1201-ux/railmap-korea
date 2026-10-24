@@ -20,7 +20,10 @@ export function ensureMajorStations(items=[]){
 }
 export function getStation(items,query){
   const normalized=normalizeName(query);
-  return normalized?items.find(s=>normalizeName(s.name)===normalized)||null:null;
+  if(!normalized)return null;
+  const matches=(Array.isArray(items)?items:[]).filter(s=>s?.id&&normalizeName(s.name)===normalized);
+  // Exact name matches from multiple official IDs require explicit selection.
+  return new Set(matches.map(s=>s.id)).size===1?matches[0]:null;
 }
 export function searchStations(items,query,limit=12){
   const q=normalizeName(query);

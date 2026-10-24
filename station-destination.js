@@ -1,5 +1,6 @@
 import {renderTrainTimetable} from './timetable-view.js';
-import {stationGuideOptions,stationGuideOptionCount,stationGuideNearby} from './station-destination-options.js';
+import {stationGuideOptions,stationGuideOptionCount,stationGuideNearby,stationGuideMode} from './station-destination-options.js';
+import {lookupRegisteredStation} from './station-matching.js';
 import {getStation,normalizeName} from './station-utils.js';
 
 const app=document.getElementById('spStationLookup');
@@ -49,9 +50,9 @@ if(app){
   }else{
    const hint=document.createElement('p');
    hint.className='sp-station-options-hint';
-   const lineMapped=stationGuideNearby(origin,official,1).length>0;
-   hint.textContent=query?'등록역 '+total+'개 중 '+matches.length+'개 · 직통 여부는 조회 후 확인':
-    (lineMapped?'같은 철도 노선의 역 ':'등록된 역 ')+matches.length+'개 참고 · 실제 직통편은 조회 후 확인';
+   const mode=stationGuideMode(origin,official);
+   hint.textContent=query?'등록된 역 '+total+'개 중 '+matches.length+'개 · 직통 여부는 시간표 조회 후 확인':
+    (mode==='corridor'?'철도 노선 참고 역 ':mode==='region'?'같은 지역 등록역 ':'전국 등록역 예시 ')+matches.length+'곳 · 직통 운행은 미확인';
    options.append(hint);
    for(const station of matches){
     const button=document.createElement('button');button.type='button';button.setAttribute('role','option');
@@ -83,9 +84,11 @@ if(app){
  async function lookup(event){
   event.preventDefault();hideOptions();
   if(!loaded){status.textContent='공식 역 목록을 불러오지 못했습니다. 다시 접속해 주세요.';status.dataset.status='error';return;}
-  const to=chosen&&normalizeName(chosen.name)===normalizeName(input.value)?chosen:getStation(official,input.value);
+  const resolved=lookupRegisteredStation(official,input.value);
+  const to=chosen&&normalizeName(chosen.name)===normalizeName(input.value)?chosen:resolved.station;
   if(!to||to.id===from){
-   status.textContent='공식 목록에서 출발역과 다른 도착역을 선택해 주세요.';
+   status.textContent=resolved.ambiguous?'이름이 같은 역이 여러 곳입니다. 아래 목록에서 지역을 확인하고 선택해 주세요.':
+    '공식 목록에서 출발역과 다른 도착역을 선택해 주세요.';
    status.dataset.status='error';input.focus();return;
   }
   const date=dateInput.value;

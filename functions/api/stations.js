@@ -1,5 +1,6 @@
 import {callTago,cleanStation,DataError,json} from '../_lib/tago.js';
 import {provinceFromTagoCity} from '../../station-regions.js';
+import {stationMatchingAudit} from '../../station-matching.js';
 
 // The fallback ids are reserved for stable well-known stations, not fabricated departures.
 export const POPULAR_STATIONS = Object.freeze([
@@ -49,7 +50,7 @@ export async function loadAllStations(env){
  if(!unique.length)throw new DataError('공식 역 목록을 조회하지 못했습니다. API 권한과 응답을 확인해 주세요.',502);
  const final=ensurePopularStations(unique);
  const supplemented=final.filter(s=>s.source==='verified-station-code').map(s=>s.name);
- return {stations:final,partial:failedCodes.length>0||missingPages||supplemented.length>0,failedRegions:failedCodes.length,supplemented,source:'국토교통부 TAGO'};
+ return {stations:final,matching:stationMatchingAudit(final),partial:failedCodes.length>0||missingPages||supplemented.length>0,failedRegions:failedCodes.length,supplemented,source:'국토교통부 TAGO'};
 }
 export async function getCachedStationList(env,request){
  const key=new Request(new URL('/api/stations?v=nationwide-regions-v1',request.url).toString());

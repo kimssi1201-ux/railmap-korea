@@ -27,15 +27,16 @@ function showSuggestions(side){
  const region=canBrowseRegions?state.pickerRegion:'';
  const candidates=side==='to'&&state.destinationMode==='all'&&state.selected.from
   ?destinationCandidates(state.selected.from,state.stations,18):[];
- const hits=side==='to'&&state.destinationMode==='all'
+ let hits=side==='to'&&state.destinationMode==='all'
   ?destinationPickerMatches(pool,input.value,region,state.selected.from,candidates)
   :stationPickerMatches(pool,input.value,region);
+ if(side==='from')hits=hits.slice(0,normalizeName(input.value)||region?20:12);
  ui.suggestions.replaceChildren();
  if(canBrowseRegions){
   const head=text('div','','station-picker-head');
   const eligible=side==='to'?pool.filter(s=>s.id!==state.selected.from?.id):pool;
   const total=eligible.length;
-  const count=text('strong','전국 '+total+'개 역 · '+hits.length+'개 표시','station-picker-count');
+  const count=text('strong','등록역 '+total+'개 · '+hits.length+'개 표시','station-picker-count');
   const select=document.createElement('select');select.className='station-picker-region';
   select.setAttribute('aria-label','역을 찾을 시·도 선택');
   select.append(new Option('모든 지역 · '+total+'개',''));

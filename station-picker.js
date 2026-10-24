@@ -1,5 +1,6 @@
 import {normalizeName} from './station-utils.js';
 import {RAIL_PROVINCES} from './station-regions.js';
+import {suggestedRegisteredStations} from './station-matching.js';
 // Show every station returned by TAGO; there is no arbitrary twelve-item cap.
 export function stationPickerRegion(station){
  return RAIL_PROVINCES.includes(station?.region)?station.region:'지역 확인 필요';
@@ -16,10 +17,10 @@ export function stationPickerRegions(stations){
 // Only officially returned stations are selectable. Corridor candidates are merely sorted first.
 export function destinationPickerMatches(stations,query='',region='',departure=null,candidates=[]){
  const matches=stationPickerMatches(stations,query,region).filter(s=>s.id!==departure?.id);
- if(normalizeName(query)||region||!candidates.length)return matches;
- const ranks=new Map();
- candidates.forEach((s,i)=>{if(s?.id&&!ranks.has(s.id))ranks.set(s.id,i)});
- return matches.sort((a,b)=>(ranks.get(a.id)??Infinity)-(ranks.get(b.id)??Infinity));
+ if(normalizeName(query)||region)return matches.slice(0,20);
+ const preferred=departure?suggestedRegisteredStations(departure,matches,12).stations:[];
+ const order=new Map([...preferred,...candidates].map((s,i)=>[s.id,i]));
+ return matches.sort((a,b)=>(order.get(a.id)??Infinity)-(order.get(b.id)??Infinity)).slice(0,12);
 }
 export function stationPickerMatches(stations,query='',region=''){
  const q=normalizeName(query);
