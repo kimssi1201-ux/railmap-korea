@@ -70,7 +70,7 @@ test('dedicated train timetable stays a direct lookup without automatic transfer
  assert.doesNotMatch(src,/searchOneTransfer/);
  assert.doesNotMatch(src,/renderTransferCards/);
  assert.match(src,/\/api\/trains/);
- assert.match(page,/app\.js\?v=rail-simple-v1/);
+ assert.match(page,/app\.js\?v=national-station-match-v1/);
  assert.match(page,/station-pages\.css\?v=rail-simple-v1/);
 });
 
