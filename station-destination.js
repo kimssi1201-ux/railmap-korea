@@ -143,7 +143,7 @@ if(app){
       btn.addEventListener('click',()=>{selectStation(station);form.requestSubmit()});
       alternatives.append(btn);
      }
-     status.textContent=label(to)+' 직통편 미확인 · 아래는 TAGO에서 직접 배차가 확인된 주변 역입니다. 서울까지 환승은 공식 예매처에서 확인하세요.';
+     status.textContent=label(to)+' 직통편 미확인 · 아래는 TAGO에서 직접 배차가 확인된 주변 역입니다. 다른 환승 경로는 공식 예매처에서 확인하세요.';
     }else{
      status.textContent=label(to)+' 직통편 미확인 · 인접 후보역에서도 확정된 배차를 받지 못했습니다. 환승 경로가 없다는 뜻은 아닙니다.';
     }
