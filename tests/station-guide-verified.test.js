@@ -34,13 +34,13 @@ test('Yongsan station search is no longer restricted to two featured destination
 test('station destination input has visible options container for nationwide lookups',()=>{
  const html=stationDetailHtml({id:'NAT999999',name:'광운대',region:'서울'});
  assert.match(html,/id="spDestinationOptions"/);
- assert.match(html,/national-station-match-v1/);
+ assert.match(html,/national-station-match-v2/);
  assert.ok(!html.includes('id="spLoadMoreRoutes"'));
 });
 
 test('station detail keeps one direct timetable search and does not auto-load transfer connections',()=>{
  const html=stationDetailHtml(FEATURED_STATIONS[0]);
- assert.match(html,/national-station-match-v1/);
+ assert.match(html,/national-station-match-v2/);
  const js=readFileSync(new URL('../station-destination.js',import.meta.url),'utf8');
  assert.doesNotMatch(js,/searchOneTransfer/);
  assert.doesNotMatch(js,/renderTransferCards/);
