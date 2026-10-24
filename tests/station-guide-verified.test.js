@@ -26,7 +26,7 @@ test('every featured station displays one direct timetable search and no candida
 test('Yongsan station search is no longer restricted to two featured destinations',()=>{
  const html=stationDetailHtml(FEATURED_STATIONS.find(s=>s.name==='용산'));
  assert.match(html,/data-station-name="용산"/);
- assert.match(html,/예: 익산, 전주, 광주송정/);
+ assert.match(html,/역 이름 입력 또는 확인된 직통역 선택/);
  assert.match(html,/공식 직통 시간표를 조회하세요/);
  assert.match(html,/환승 경로·좌석·운행 변경은 공식 예매처에서 확인하세요/);
 });
@@ -34,25 +34,28 @@ test('Yongsan station search is no longer restricted to two featured destination
 test('station destination input has visible options container for nationwide lookups',()=>{
  const html=stationDetailHtml({id:'NAT999999',name:'광운대',region:'서울'});
  assert.match(html,/id="spDestinationOptions"/);
- assert.match(html,/national-station-match-v2/);
+ assert.match(html,/verified-shortlist-v1/);
  assert.ok(!html.includes('id="spLoadMoreRoutes"'));
 });
 
 test('station detail keeps one direct timetable search and does not auto-load transfer connections',()=>{
  const html=stationDetailHtml(FEATURED_STATIONS[0]);
- assert.match(html,/national-station-match-v2/);
+ assert.match(html,/verified-shortlist-v1/);
  const js=readFileSync(new URL('../station-destination.js',import.meta.url),'utf8');
  assert.doesNotMatch(js,/searchOneTransfer/);
  assert.doesNotMatch(js,/renderTransferCards/);
  assert.match(js,/직통 시간표 미확인/);
 });
 
-test('역 페이지는 주변 역을 직통 대안으로 확정할 때 공식 배차 응답을 검증한다',()=>{
+
+test('date-specific official direct shortlist replaces misleading registered-station recommendations',()=>{
  const html=stationDetailHtml(FEATURED_STATIONS[0]);
- assert.match(html,/id="spVerifiedAlternatives"/);
+ assert.doesNotMatch(html,/spVerifiedAlternatives/);
+ assert.match(html,/실제 직통편이 확인된 후보역/);
  const js=readFileSync(new URL('../station-destination.js',import.meta.url),'utf8');
- assert.match(js,/stationGuideNearby/);
- assert.match(js,/const responses=await Promise\.all/);
- assert.match(js,/const count=payload\.trains\.filter/);
- assert.match(js,/const verified=responses\.filter\(Boolean\)/);
+ assert.match(js,/verifyStationDestinations/);
+ assert.match(js,/verified\.confirmed/);
+ assert.match(js,/data\.partial/);
+ assert.match(js,/역 코드는 정상 매칭됐지만/);
+ assert.doesNotMatch(js,/const responses=await Promise\.all/);
 });
