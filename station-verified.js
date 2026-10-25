@@ -1,5 +1,5 @@
-import {destinationCandidates} from './train-destinations.js?v=gwangju-destinations-v2';
-import {sameCorridorStations} from './station-matching.js?v=gwangju-destinations-v2';
+import {destinationCandidates} from './train-destinations.js?v=sintanjin-mobile-picks-v1';
+import {sameCorridorStations} from './station-matching.js?v=sintanjin-mobile-picks-v1';
 
 // A shortlist is not the full rail network. Only official dated API rows can confirm a route.
 export function candidateStationsForVerification(origin,stations=[],limit=8){
