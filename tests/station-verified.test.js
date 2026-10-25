@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {candidateStationsForVerification,verifyStationDestinations,stationCorridorReferences} from '../station-verified.js';
+import {candidateStationsForVerification,verifyStationDestinations,stationCorridorReferences,allCorridorDestinations,visibleCorridorDestinations} from '../station-verified.js';
 import {RAIL_CORRIDORS} from '../train-destinations.js';
 
 const station=(name,id)=>({name,id});
@@ -107,4 +107,58 @@ test('노선 정보가 있는 신탄진·광주 구간과 공식 배차 확인 �
  const verified=await verifyStationDestinations({origin:all[0],stations:all,date:'2026-10-25',limit:8,
   request:async({to})=>({ok:true,trains:to===all[1].id?[{depTime:'20261025100000',arrTime:'20261025110000'}]:[]})});
  assert.deepEqual(verified.confirmed.map(r=>r.station.name),['대전']);
+});
+
+
+test('단양역은 6곳 제한 없이 같은 참고 노선의 전체 등록 목적지를 펼쳐볼 수 있다',()=>{
+ const line=RAIL_CORRIDORS.find(row=>row.includes('단양')&&row.includes('태화강'));
+ assert.ok(line?.length>12,'central corridor should have enough stops to test expansion');
+ const all=line.map((name,i)=>station(name,'NAT'+String(i).padStart(6,'0')));
+ const start=all.find(x=>x.name==='단양');
+ const candidates=allCorridorDestinations(start,all);
+ assert.equal(candidates.length,line.length-1);
+ assert.ok(candidates.some(x=>x.name==='태화강'));
+ const collapsed=visibleCorridorDestinations(start,all,[],false,12);
+ const expanded=visibleCorridorDestinations(start,all,[],true,12);
+ assert.equal(collapsed.stations.length,12);
+ assert.ok(collapsed.hasMore);
+ assert.equal(collapsed.total,line.length-1);
+ assert.equal(expanded.stations.length,line.length-1);
+ assert.equal(new Set(expanded.stations.map(x=>x.id)).size,expanded.stations.length);
+ assert.equal(expanded.completeDirectRoutes,false);
+ assert.ok(!expanded.stations.some(x=>x.id===start.id));
+});
+
+test('날짜별 직통 확인 항목은 후보 전체 위에 표시되지만 다른 역을 직통으로 표시하지 않는다',()=>{
+ const first=station('단양','NAT050001'),a=station('풍기','NAT050002'),b=station('태화강','NAT050003'),c=station('영주','NAT050004');
+ const raw=[first,a,b,c];
+ const shown=visibleCorridorDestinations(first,raw,[{station:b,count:8}],true);
+ assert.equal(shown.stations[0].name,'태화강');
+ assert.equal(shown.stations.length,3);
+ assert.equal(shown.completeDirectRoutes,false);
+});
+
+test('각계역 같은 미매핑 지역은 행정구역만으로 도착역을 만들어내지 않는다',()=>{
+ const all=['각계','살미','도담','충주'].map((name,i)=>({...station(name,'NAT'+String(i).padStart(6,'0')),region:'충북'}));
+ const result=visibleCorridorDestinations(all[0],all,[],true);
+ assert.equal(result.total,0);
+ assert.equal(result.stations.length,0);
+});
+
+test('추가 조회는 전달받은 참고역 중 최대 8곳만 날짜별로 검증하고 재조회용 역코드를 반환한다',async()=>{
+ const raw=['단양','풍기','영주','안동','의성','영천','경주','태화강','부전','제천']
+  .map((name,i)=>station(name,'NAT'+String(i).padStart(6,'0')));
+ const origin=raw[0],extra=raw.slice(1);
+ const visited=[];
+ const result=await verifyStationDestinations({origin,stations:raw,date:'2026-10-25',limit:8,
+  candidates:extra,request:async({to})=>{
+   visited.push(to);
+   return {ok:true,trains:to===extra[0].id?[{depTime:'20261025080000',arrTime:'20261025090000'}]:[]};
+  }});
+ assert.equal(result.checked,8);
+ assert.equal(result.testedIds.length,8);
+ assert.equal(new Set(result.testedIds).size,8);
+ assert.equal(result.confirmed.length,1);
+ assert.deepEqual(result.confirmed.map(r=>r.station.id),[extra[0].id]);
+ assert.ok(result.testedIds.every(id=>visited.includes(id)));
 });
