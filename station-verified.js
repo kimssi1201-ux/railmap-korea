@@ -37,8 +37,9 @@ export function stationCorridorReferences(origin,stations=[],limit=8){
  const candidates=candidateStationsForVerification(origin,stations,limit);
  return {kind:candidates.length?'corridor':'none',stations:candidates};
 }
-export async function verifyStationDestinations({origin,stations,date,request,signal,limit=8}){
- const candidates=candidateStationsForVerification(origin,stations,limit);
+export async function verifyStationDestinations({origin,stations,date,request,signal,limit=8,candidates:providedCandidates=null}){
+ const candidates=(Array.isArray(providedCandidates)?providedCandidates:candidateStationsForVerification(origin,stations,limit))
+  .filter(s=>s?.id&&s.id!==origin?.id).slice(0,Math.max(0,Math.min(limit,12)));
  const confirmed=[],unknown=[];
  let checked=0,failed=0;
  const datePrefix=String(date).replaceAll('-','');
@@ -64,5 +65,5 @@ export async function verifyStationDestinations({origin,stations,date,request,si
    else if(item.partial)unknown.push(item.station);
   }
  }
- return {confirmed,unknown,checked,candidates:candidates.length,failed,exhaustive:false,date};
+ return {confirmed,unknown,checked,candidates:candidates.length,failed,testedIds:candidates.slice(0,checked).map(s=>s.id),exhaustive:false,date};
 }
