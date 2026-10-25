@@ -14,6 +14,23 @@ export function candidateStationsForVerification(origin,stations=[],limit=8){
  return ordered.filter(s=>byId.has(s.id)&&!seen.has(s.id)&&(seen.add(s.id),true))
   .slice(0,Math.max(0,Math.min(limit,12)));
 }
+// All *registered* stations referenced by the same curated corridor, without a UI cap.
+// Same corridor never proves that a particular date has a direct train.
+export function allCorridorDestinations(origin,stations=[]){
+ return sameCorridorStations(origin,stations,1000);
+}
+export function visibleCorridorDestinations(origin,stations=[],confirmed=[],expanded=false,initialCount=12){
+ const corridor=allCorridorDestinations(origin,stations);
+ const ids=new Set(),combined=[];
+ for(const item of [...confirmed.map(x=>x?.station).filter(Boolean),...corridor]){
+  if(!item?.id||item.id===origin?.id||ids.has(item.id))continue;
+  ids.add(item.id);combined.push(item);
+ }
+ return {stations:expanded?combined:combined.slice(0,Math.max(1,initialCount)),
+  total:combined.length,hasMore:!expanded&&combined.length>initialCount,
+  // Even when the reference list is fully expanded, true direct-service coverage is NOT exhaustive.
+  completeDirectRoutes:false};
+}
 // Unlike region browsing, destination recommendations must have a corridor hint
 // or an actual verified train. Province membership alone is not a railway link.
 export function stationCorridorReferences(origin,stations=[],limit=8){
