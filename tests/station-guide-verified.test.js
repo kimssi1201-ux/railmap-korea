@@ -27,20 +27,20 @@ test('Yongsan station search is no longer restricted to two featured destination
  const html=stationDetailHtml(FEATURED_STATIONS.find(s=>s.name==='용산'));
  assert.match(html,/data-station-name="용산"/);
  assert.match(html,/역 이름 입력 또는 확인된 직통역 선택/);
- assert.match(html,/실제 직통편이 확인된 후보역을 안내합니다/);
+ assert.match(html,/노선 참고역을 선택하거나/);
  assert.match(html,/환승 경로·좌석·운행 변경은 공식 예매처에서 확인하세요/);
 });
 
 test('station destination input has visible options container for nationwide lookups',()=>{
  const html=stationDetailHtml({id:'NAT999999',name:'광운대',region:'서울'});
  assert.match(html,/id="spDestinationOptions"/);
- assert.match(html,/verified-shortlist-v1/);
+ assert.match(html,/gwangju-destinations-v2/);
  assert.ok(!html.includes('id="spLoadMoreRoutes"'));
 });
 
 test('station detail keeps one direct timetable search and does not auto-load transfer connections',()=>{
  const html=stationDetailHtml(FEATURED_STATIONS[0]);
- assert.match(html,/verified-shortlist-v1/);
+ assert.match(html,/gwangju-destinations-v2/);
  const js=readFileSync(new URL('../station-destination.js',import.meta.url),'utf8');
  assert.doesNotMatch(js,/searchOneTransfer/);
  assert.doesNotMatch(js,/renderTransferCards/);
@@ -58,4 +58,12 @@ test('date-specific official direct shortlist replaces misleading registered-sta
  assert.match(js,/data\.partial/);
  assert.match(js,/역 코드는 정상 매칭됐지만/);
  assert.doesNotMatch(js,/const responses=await Promise\.all/);
+});
+
+test('광주 등 후보가 검증 대기 중에도 관련 역을 먼저 선택할 수 있다',()=>{
+ const js=readFileSync(new URL('../station-destination.js',import.meta.url),'utf8');
+ assert.match(js,/candidateStationsForVerification/);
+ assert.match(js,/노선 참고 · 직통 미확인/);
+ assert.match(js,/sp-option-confirmed/);
+ assert.match(js,/전국 등록역 검색/);
 });
