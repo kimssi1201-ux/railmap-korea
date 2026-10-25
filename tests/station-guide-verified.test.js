@@ -27,20 +27,20 @@ test('Yongsan station search is no longer restricted to two featured destination
  const html=stationDetailHtml(FEATURED_STATIONS.find(s=>s.name==='용산'));
  assert.match(html,/data-station-name="용산"/);
  assert.match(html,/역 이름 입력 또는 확인된 직통역 선택/);
- assert.match(html,/같은 노선의 역을 빠르게 선택하거나/);
+ assert.match(html,/노선상 목적지를 먼저 보여줍니다/);
  assert.match(html,/환승 경로·좌석·운행 변경은 공식 예매처에서 확인하세요/);
 });
 
 test('station destination input has visible options container for nationwide lookups',()=>{
  const html=stationDetailHtml({id:'NAT999999',name:'광운대',region:'서울'});
  assert.match(html,/id="spDestinationOptions"/);
- assert.match(html,/route-reference-safety-v1/);
+ assert.match(html,/all-destinations-v1/);
  assert.ok(!html.includes('id="spLoadMoreRoutes"'));
 });
 
 test('station detail keeps one direct timetable search and does not auto-load transfer connections',()=>{
  const html=stationDetailHtml(FEATURED_STATIONS[0]);
- assert.match(html,/route-reference-safety-v1/);
+ assert.match(html,/all-destinations-v1/);
  const js=readFileSync(new URL('../station-destination.js',import.meta.url),'utf8');
  assert.doesNotMatch(js,/searchOneTransfer/);
  assert.doesNotMatch(js,/renderTransferCards/);
@@ -51,7 +51,7 @@ test('station detail keeps one direct timetable search and does not auto-load tr
 test('date-specific official direct shortlist replaces misleading registered-station recommendations',()=>{
  const html=stationDetailHtml(FEATURED_STATIONS[0]);
  assert.doesNotMatch(html,/spVerifiedAlternatives/);
- assert.match(html,/같은 노선의 역을 빠르게 선택하거나/);
+ assert.match(html,/노선상 목적지를 먼저 보여줍니다/);
  const js=readFileSync(new URL('../station-destination.js',import.meta.url),'utf8');
  assert.match(js,/verifyStationDestinations/);
  assert.match(js,/verified\.confirmed/);
@@ -86,6 +86,25 @@ test('station quick picks cannot fall back to arbitrary stations in the same pro
  const js=readFileSync(new URL('../station-destination.js',import.meta.url),'utf8');
  assert.match(js,/stationCorridorReferences/);
  assert.doesNotMatch(js,/official\.filter\(s=>s\.region===fromRegion/);
- assert.match(js,/quickWrap\.hidden=suggestions\.length===0/);
+ assert.match(js,/quickWrap\.hidden=visible\.total===0/);
  assert.doesNotMatch(js,/같은 지역 등록역 · 직통 미확인/);
+});
+
+
+test('각 기차역 상세페이지는 전체 참고 목적지 펼치기와 추가 직통편 조회를 제공한다',()=>{
+ const html=stationDetailHtml({id:'NAT050000',name:'단양',region:'충북'});
+ assert.match(html,/id="spQuickDestinations"/);
+ assert.match(html,/id="spQuickMore"/);
+ assert.match(html,/id="spQuickVerifyMore"/);
+ assert.match(html,/id="spQuickSummary"/);
+ assert.match(html,/노선 참고 목적지 전체 보기/);
+ const js=readFileSync(new URL('../station-destination.js',import.meta.url),'utf8');
+ assert.match(js,/visibleCorridorDestinations/);
+ assert.match(js,/allCorridorDestinations/);
+ assert.match(js,/expandedDestinations=!expandedDestinations/);
+ assert.match(js,/startVerification\(\)/);
+ assert.match(js,/candidates:remaining/);
+ assert.match(js,/quickMore\.hidden=visible\.total<=12/);
+ assert.match(js,/직통 운행은 날짜별 확인/);
+ assert.doesNotMatch(js,/slice\(0,6\)/);
 });
