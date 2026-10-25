@@ -1,0 +1,5 @@
+RAILMAP deployment trigger
+Requested: 2026-10-25 (Asia/Seoul)
+Release source commit: 34b1b2142cb23feb1813497d4f9a56f1cf218fec
+Change: safety fix to avoid same-region unrelated station suggestions
+Deployment: Cloudflare Pages GitHub automatic deployment target (only Cloudflare dashboard can confirm the live release)
