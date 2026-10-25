@@ -57,6 +57,7 @@ export function stationDetailHtml(s){
     <div class="sp-quick-heading"><strong>목적지 선택</strong><small id="spQuickSource">노선 참고역 · 직통 여부는 날짜별 확인</small></div>
     <div id="spQuickDestinations" class="sp-quick-destinations" aria-label="노선 참고 목적지 선택"></div>
     <button type="button" id="spQuickMore" class="sp-quick-more" hidden>노선 참고 목적지 전체 보기</button>
+    <button type="button" id="spQuickVerifyMore" class="sp-quick-verify" hidden>추가 목적지 직통 여부 확인</button>
     <p id="spQuickSummary" class="sp-quick-summary" role="status"></p>
    </div>
    <label for="spDestinationInput">다른 도착역 검색</label>
