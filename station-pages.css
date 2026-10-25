@@ -109,3 +109,8 @@
 /* Verified destination picker: short, date-scoped results, never the entire station registry. */
 .sp-lookup .sp-station-options{max-height:min(32dvh,240px)}
 .sp-lookup .sp-station-options-hint{background:#eef5fc}
+
+/* Differentiates scheduled direct departures from same-corridor reference stations. */
+.sp-lookup .sp-station-options .sp-option-confirmed{background:#f0fbf5}
+.sp-lookup .sp-station-options .sp-option-confirmed small{color:#168453;font-weight:800}
+.sp-lookup .sp-station-options button:not(.sp-option-confirmed) small{color:#6a7e95}
