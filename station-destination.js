@@ -19,6 +19,7 @@ if(app){
  const quick=document.getElementById('spQuickDestinations');
  const quickSource=document.getElementById('spQuickSource');
  const quickMore=document.getElementById('spQuickMore');
+ const quickVerify=document.getElementById('spQuickVerifyMore');
  const quickSummary=document.getElementById('spQuickSummary');
  let official=[],chosen=null,requestId=0,controller=null,loaded=false,verifySequence=0,verifyAbort=null,expandedDestinations=false;
  let verified={date:'',state:'idle',confirmed:[],checked:0,candidates:0,failed:0};
@@ -75,6 +76,36 @@ if(app){
   const stations=allCorridorDestinations({id:from,name:fromName},official);
   return {kind:stations.length?'corridor':'none',stations};
  }
+ function verifyNextDestinations(){
+  if(!loaded||verified.date!==dateInput.value||verified.state==='checking')return;
+  const all=getReferenceSuggestions().stations;
+  const checked=new Set(verified.testedIds||[]);
+  const remaining=all.filter(station=>!checked.has(station.id)).slice(0,8);
+  if(!remaining.length)return;
+  const token=verifySequence,date=dateInput.value,base={...verified};
+  const active=new AbortController();verifyAbort=active;
+  verified={...base,state:'checking'};
+  renderQuickDestinations();
+  const timeout=setTimeout(()=>active.abort(),25000);
+  verifyStationDestinations({origin:{id:from,name:fromName},stations:official,
+   date,signal:active.signal,request:getTimetable,limit:8,candidates:remaining})
+   .then(data=>{
+    if(token!==verifySequence)return;
+    const confirmed=new Map([...base.confirmed,...data.confirmed].map(x=>[x.station.id,x]));
+    verified={date,state:'done',confirmed:[...confirmed.values()],
+     unknown:[...(base.unknown||[]),...data.unknown],checked:(base.checked||0)+data.checked,
+     candidates:(base.candidates||0)+data.candidates,failed:(base.failed||0)+data.failed,
+     testedIds:[...new Set([...(base.testedIds||[]),...data.testedIds])]};
+   }).catch(()=>{
+    if(token!==verifySequence)return;
+    verified={...base,state:'failed'};
+   }).finally(()=>{
+    clearTimeout(timeout);
+    if(token===verifySequence){verifyAbort=null;renderQuickDestinations();
+     if(document.activeElement===input&&!input.value.trim())showOptions();}
+   });
+ }
+ if(quickVerify)quickVerify.addEventListener('click',verifyNextDestinations);
  function renderQuickDestinations(){
   if(!quick)return;
   quick.replaceChildren();
@@ -91,11 +122,17 @@ if(app){
    quickMore.textContent=expandedDestinations?'목적지 목록 접기':'노선 참고 목적지 전체 '+visible.total+'곳 보기';
    quickMore.setAttribute('aria-expanded',String(expandedDestinations));
   }
+  if(quickVerify){
+   const checked=new Set(verified.testedIds||[]);
+   const remaining=getReferenceSuggestions().stations.filter(station=>!checked.has(station.id));
+   quickVerify.hidden=verified.state==='idle'||verified.state==='checking'||!remaining.length;
+   quickVerify.textContent='다른 목적지 직통 여부 추가 확인 ('+remaining.length+'곳 남음)';
+  }
   if(quickSummary){
    const progress=verified.date===dateInput.value&&verified.state==='checking'?' · 공식 시간표 확인 중':
     verified.state==='failed'?' · 조회 지연 또는 실패':'';
    quickSummary.textContent='✓ 직통 '+confirmed.length+'곳 확인'+
-    (verified.checked?' · 후보 '+verified.checked+'곳 조회':'')+progress+
+    (verified.checked?' · 노선 참고역 '+verified.checked+'/'+visible.total+'곳 조회':'')+progress+
     ' · 노선 참고역은 직통 확정이 아니며, 다른 역은 아래에서 검색 가능합니다.';
   }
   if(!listed.length){
