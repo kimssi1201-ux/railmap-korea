@@ -57,3 +57,21 @@ test('요청 취소 상태에서는 남은 목적지를 확인하지 않는다',
  assert.equal(response.checked,0);
  assert.equal(calls,2);
 });
+
+test('광주역·극락강역·서광주역·효천역은 추천 후보가 비지 않는다',()=>{
+ const sample=['광주','극락강','광주송정','서광주','효천','화순','순천','용산','익산'].map((name,i)=>station(name,'NAT'+String(200+i)));
+ for(const [start,end] of [['광주','극락강'],['극락강','광주송정'],['광주송정','서광주'],['서광주','효천'],['효천','서광주']]){
+  const from=sample.find(s=>s.name===start);
+  const c=candidateStationsForVerification(from,sample,8);
+  assert.ok(c.some(s=>s.name===end),start+' → '+end);
+  assert.ok(!c.some(s=>s.id===from.id));
+ }
+});
+test('광주 지역 빈 공식 시간표라도 검증 후보는 유지하며 직통을 만들어내지 않는다',async()=>{
+ const list=['광주','극락강','광주송정','서광주','효천'].map((name,i)=>station(name,'NAT'+String(300+i)));
+ const response=await verifyStationDestinations({origin:list[1],stations:list,date:'2026-10-25',request:async()=>({ok:true,trains:[]})});
+ assert.ok(response.candidates>=2);
+ assert.equal(response.confirmed.length,0);
+ assert.equal(response.failed,0);
+ assert.equal(response.exhaustive,false);
+});
