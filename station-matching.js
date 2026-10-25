@@ -1,4 +1,4 @@
-import {RAIL_CORRIDORS} from './train-destinations.js';
+import {RAIL_CORRIDORS} from './train-destinations.js?v=gwangju-destinations-v2';
 import {normalizeName} from './station-utils.js';
 import {RAIL_PROVINCES} from './station-regions.js';
 
