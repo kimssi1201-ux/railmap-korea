@@ -75,3 +75,12 @@ test('광주 지역 빈 공식 시간표라도 검증 후보는 유지하며 직
  assert.equal(response.failed,0);
  assert.equal(response.exhaustive,false);
 });
+
+test('신탄진역에서도 조치원·대전 등 경부선 역이 날짜 조회 전 바로 선택 후보에 나타난다',()=>{
+ const stations=['신탄진','대전','조치원','오송','옥천','서울','논산'].map((name,i)=>station(name,'NAT'+String(400+i)));
+ const start=stations[0],choices=candidateStationsForVerification(start,stations,8);
+ assert.ok(choices.some(s=>s.name==='대전'),'Daejeon should be a nearby corridor candidate');
+ assert.ok(choices.some(s=>s.name==='조치원'),'Jochiwon should be a nearby corridor candidate');
+ assert.ok(!choices.some(s=>s.name==='논산'),'Unrelated stations should not be guessed as a direct train');
+ assert.ok(choices.every(s=>s.id!==start.id));
+});
