@@ -114,3 +114,23 @@
 .sp-lookup .sp-station-options .sp-option-confirmed{background:#f0fbf5}
 .sp-lookup .sp-station-options .sp-option-confirmed small{color:#168453;font-weight:800}
 .sp-lookup .sp-station-options button:not(.sp-option-confirmed) small{color:#6a7e95}
+
+
+/* 2026-10-25: visible destination quick picks above input; usable without iOS keyboard. */
+.sp-quick-wrap{margin:4px 0 6px;padding:12px;border:1px solid #d7e3f2;border-radius:12px;background:#f5f9ff}
+.sp-quick-heading{display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:3px 9px;margin-bottom:10px}
+.sp-quick-heading strong{font-size:13px;color:#254565}
+.sp-quick-heading small{font-size:11px;color:#768aa2}
+.sp-quick-destinations{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+.sp-quick-item{min-width:0;min-height:45px;border:1px solid #c7d9ec;border-radius:9px;background:#fff;color:#244b74;padding:8px 4px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:3px;font-size:13px;font-weight:750;word-break:keep-all}
+.sp-quick-item small{font-size:10px;color:#13744b}
+.sp-quick-item.is-confirmed{border-color:#71c7a0;background:#f0fbf6}
+.sp-quick-item.is-selected{outline:2px solid #2b6be3;outline-offset:1px;background:#edf5ff}
+.sp-quick-empty{font-size:12px;color:#7487a0;grid-column:1 / -1;margin:0}
+.sp-lookup .sp-station-picker{z-index:8}
+.sp-lookup .sp-station-options{
+ position:absolute;top:auto;bottom:calc(100% + 6px);left:0;right:0;
+ z-index:30;max-height:min(30dvh,220px);overflow-y:auto;
+ background:#fff;box-shadow:0 8px 26px #2039562b;
+}
+@media(max-width:360px){.sp-quick-wrap{padding:8px}.sp-quick-destinations{gap:5px}.sp-quick-item{font-size:12px}}
