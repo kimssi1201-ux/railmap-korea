@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {candidateStationsForVerification,verifyStationDestinations} from '../station-verified.js';
+import {candidateStationsForVerification,verifyStationDestinations,stationCorridorReferences} from '../station-verified.js';
 import {RAIL_CORRIDORS} from '../train-destinations.js';
 
 const station=(name,id)=>({name,id});
@@ -83,4 +83,28 @@ test('신탄진역에서도 조치원·대전 등 경부선 역이 날짜 조회
  assert.ok(choices.some(s=>s.name==='조치원'),'Jochiwon should be a nearby corridor candidate');
  assert.ok(!choices.some(s=>s.name==='논산'),'Unrelated stations should not be guessed as a direct train');
  assert.ok(choices.every(s=>s.id!==start.id));
+});
+
+
+test('각계역은 충북이라는 이유만으로 살미역·도담역 등을 추천하지 않는다',()=>{
+ const region='충북';
+ const all=['각계','감곡장호원','단양','도담','목행','봉양','살미','충주']
+   .map((name,i)=>({...station(name,'NAT'+String(600+i)),region}));
+ const origin=all[0];
+ assert.equal(candidateStationsForVerification(origin,all,8).length,0);
+ assert.deepEqual(stationCorridorReferences(origin,all,8),{kind:'none',stations:[]});
+});
+
+test('노선 정보가 있는 신탄진·광주 구간과 공식 배차 확인 기능은 그대로 유지한다',async()=>{
+ const regional='대전';
+ const all=['신탄진','대전','조치원','오송','서울','살미']
+  .map((name,i)=>({...station(name,'NAT'+String(700+i)),region:i===5?'충북':regional}));
+ const suggestions=stationCorridorReferences(all[0],all,8);
+ assert.equal(suggestions.kind,'corridor');
+ assert.ok(suggestions.stations.some(s=>s.name==='대전'));
+ assert.ok(suggestions.stations.some(s=>s.name==='조치원'));
+ assert.ok(!suggestions.stations.some(s=>s.name==='살미'));
+ const verified=await verifyStationDestinations({origin:all[0],stations:all,date:'2026-10-25',limit:8,
+  request:async({to})=>({ok:true,trains:to===all[1].id?[{depTime:'20261025100000',arrTime:'20261025110000'}]:[]})});
+ assert.deepEqual(verified.confirmed.map(r=>r.station.name),['대전']);
 });

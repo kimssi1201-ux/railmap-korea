@@ -1,6 +1,6 @@
 import {renderTrainTimetable} from './timetable-view.js';
 import {stationGuideSearch,stationGuideOptionCount} from './station-destination-options.js?v=verified-shortlist-v1';
-import {verifyStationDestinations,candidateStationsForVerification} from './station-verified.js?v=sintanjin-mobile-picks-v1';
+import {verifyStationDestinations,candidateStationsForVerification,stationCorridorReferences} from './station-verified.js?v=route-reference-safety-v1';
 import {lookupRegisteredStation} from './station-matching.js?v=sintanjin-mobile-picks-v1';
 import {normalizeName} from './station-utils.js';
 
@@ -15,6 +15,7 @@ if(app){
  const submit=document.getElementById('spStationSubmit');
  const status=document.getElementById('spStationResultStatus');
  const results=document.getElementById('spStationResults');
+ const quickWrap=document.getElementById('spQuickWrap');
  const quick=document.getElementById('spQuickDestinations');
  const quickSource=document.getElementById('spQuickSource');
  let official=[],chosen=null,requestId=0,controller=null,loaded=false,verifySequence=0,verifyAbort=null;
@@ -69,11 +70,7 @@ if(app){
    });
  }
  function getReferenceSuggestions(){
-  const corridor=candidateStationsForVerification({id:from,name:fromName,region:fromRegion},official,8);
-  if(corridor.length)return {kind:'corridor',stations:corridor};
-  const regional=fromRegion?official.filter(s=>s.region===fromRegion&&s.id!==from)
-   .sort((a,b)=>a.name.localeCompare(b.name,'ko')).slice(0,8):[];
-  return {kind:regional.length?'region':'none',stations:regional};
+  return stationCorridorReferences({id:from,name:fromName},official,8);
  }
  function renderQuickDestinations(){
   if(!quick)return;
@@ -84,8 +81,8 @@ if(app){
   const counts=new Map(confirmed.map(x=>[x.station.id,x.count]));
   const already=new Set(),suggestions=[...confirmed.map(x=>x.station),...reference.stations]
    .filter(s=>s?.id&&!already.has(s.id)&&(already.add(s.id),true)).slice(0,6);
-  quickSource.textContent=reference.kind==='corridor'?'노선 참고 · 직통 여부는 조회 후 확인':
-   reference.kind==='region'?'같은 지역 등록역 · 직통 미확인':'목적지는 이름으로 직접 검색';
+  if(quickWrap)quickWrap.hidden=suggestions.length===0;
+  quickSource.textContent=reference.kind==='corridor'?'노선 참고 · 직통 여부는 조회 후 확인':'목적지는 이름으로 직접 검색';
   if(confirmed.length)quickSource.textContent='✓ 표시된 역만 선택 날짜의 직통편 확인';
   if(!suggestions.length){
    const note=document.createElement('p');note.className='sp-quick-empty';
@@ -98,7 +95,7 @@ if(app){
    b.append(labelText);
    if(counts.has(station.id)){const mark=document.createElement('small');mark.textContent='✓ 직통 '+counts.get(station.id)+'편';b.append(mark);b.classList.add('is-confirmed');}
    if(chosen?.id===station.id)b.classList.add('is-selected');
-   b.setAttribute('aria-label',label(station)+(counts.has(station.id)?' 직통 배차 확인':' 노선 또는 지역 참고, 직통 미확인'));
+   b.setAttribute('aria-label',label(station)+(counts.has(station.id)?' 직통 배차 확인':' 노선 참고, 직통 미확인'));
    b.addEventListener('click',()=>selectStation(station));
    quick.append(b);
   }
@@ -123,7 +120,7 @@ if(app){
    const progress=verified.state==='checking'?' · 공식 시간표 확인 중':
     verified.state==='failed'||verified.failed||verified.unknown?.length?' · 일부 구간 확인 실패':'';
    hint.textContent=(confirmed.length?'직통 확인 '+confirmed.length+'곳 · ':'')+
-    (reference.kind==='corridor'?'노선 참고 ':reference.kind==='region'?'같은 지역 참고 ':'등록역 참고 ')+suggestions.length+'곳'+progress+
+    (reference.kind==='corridor'?'노선 참고 ':'검증된 참고역 없음 · ')+suggestions.length+'곳'+progress+
     ' · 참고역의 직통 여부는 미확인';
    if(!matches.length)hint.textContent='노선 참고 후보가 없습니다. 역 이름을 직접 입력해 시간표를 조회하세요.';
   }else{
@@ -136,7 +133,7 @@ if(app){
    const heading=document.createElement('strong');heading.textContent=label(station);
    const info=document.createElement('small');
    info.textContent=checked.has(station.id)?'직통 '+checked.get(station.id)+'편 확인':
-    empty?(reference.kind==='corridor'?'노선 참고 · 직통 미확인':'같은 지역 등록역 · 직통 미확인'):(station.region||'공식 등록역')+' · 직통 미확인';
+    empty?'노선 참고 · 직통 미확인':(station.region||'공식 등록역')+' · 직통 미확인';
    if(checked.has(station.id))button.classList.add('sp-option-confirmed');
    button.append(heading,info);
    button.addEventListener('click',()=>selectStation(station));

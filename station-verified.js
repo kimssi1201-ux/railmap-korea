@@ -14,6 +14,12 @@ export function candidateStationsForVerification(origin,stations=[],limit=8){
  return ordered.filter(s=>byId.has(s.id)&&!seen.has(s.id)&&(seen.add(s.id),true))
   .slice(0,Math.max(0,Math.min(limit,12)));
 }
+// Unlike region browsing, destination recommendations must have a corridor hint
+// or an actual verified train. Province membership alone is not a railway link.
+export function stationCorridorReferences(origin,stations=[],limit=8){
+ const candidates=candidateStationsForVerification(origin,stations,limit);
+ return {kind:candidates.length?'corridor':'none',stations:candidates};
+}
 export async function verifyStationDestinations({origin,stations,date,request,signal,limit=8}){
  const candidates=candidateStationsForVerification(origin,stations,limit);
  const confirmed=[],unknown=[];

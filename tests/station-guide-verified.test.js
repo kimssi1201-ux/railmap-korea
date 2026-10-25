@@ -34,13 +34,13 @@ test('Yongsan station search is no longer restricted to two featured destination
 test('station destination input has visible options container for nationwide lookups',()=>{
  const html=stationDetailHtml({id:'NAT999999',name:'광운대',region:'서울'});
  assert.match(html,/id="spDestinationOptions"/);
- assert.match(html,/sintanjin-mobile-picks-v1/);
+ assert.match(html,/route-reference-safety-v1/);
  assert.ok(!html.includes('id="spLoadMoreRoutes"'));
 });
 
 test('station detail keeps one direct timetable search and does not auto-load transfer connections',()=>{
  const html=stationDetailHtml(FEATURED_STATIONS[0]);
- assert.match(html,/sintanjin-mobile-picks-v1/);
+ assert.match(html,/route-reference-safety-v1/);
  const js=readFileSync(new URL('../station-destination.js',import.meta.url),'utf8');
  assert.doesNotMatch(js,/searchOneTransfer/);
  assert.doesNotMatch(js,/renderTransferCards/);
@@ -80,4 +80,12 @@ test('station detail offers destination buttons before manual search on mobile',
  assert.match(js,/getReferenceSuggestions/);
  assert.match(js,/quick\.append\(b\)/);
  assert.match(js,/selectStation\(station\)/);
+});
+
+test('station quick picks cannot fall back to arbitrary stations in the same province',()=>{
+ const js=readFileSync(new URL('../station-destination.js',import.meta.url),'utf8');
+ assert.match(js,/stationCorridorReferences/);
+ assert.doesNotMatch(js,/official\.filter\(s=>s\.region===fromRegion/);
+ assert.match(js,/quickWrap\.hidden=suggestions\.length===0/);
+ assert.doesNotMatch(js,/같은 지역 등록역 · 직통 미확인/);
 });
