@@ -3,15 +3,16 @@ import {sameCorridorStations} from './station-matching.js';
 
 // A shortlist is not the full rail network. Only official dated API rows can confirm a route.
 export function candidateStationsForVerification(origin,stations=[],limit=8){
- const map=new Map((Array.isArray(stations)?stations:[]).filter(s=>s?.id&&s?.name&&s.id!==origin?.id).map(s=>[s.id,s]));
- const priority=new Map(['서울','청량리','부전','동대구','태화강','포항','동해','경주','진주','마산','익산','대전','부산','목포','광주송정'].map((s,i)=>[s,i]));
- const suggested=destinationCandidates(origin,[...map.values()],24);
- const nearby=sameCorridorStations(origin,[...map.values()],24);
- const unique=new Map([...suggested,...nearby].map(s=>[s.id,s]));
- return [...unique.values()].sort((a,b)=>{
-  const pa=priority.get(a.name.replace(/역$/u,'')),pb=priority.get(b.name.replace(/역$/u,''));
-  return (pa??999)-(pb??999)||a.name.localeCompare(b.name,'ko');
- }).slice(0,Math.max(0,Math.min(limit,12)));
+ const available=(Array.isArray(stations)?stations:[]).filter(s=>s?.id&&s?.name&&s.id!==origin?.id);
+ const byId=new Set(available.map(s=>s.id));
+ const near=sameCorridorStations(origin,available,24);
+ const network=destinationCandidates(origin,available,24);
+ // Check nearby station pairs first, then larger corridor hubs. Neither is a proven direct route.
+ const hubs=['광주송정','광주','순천','목포','익산','용산','서울','부전','청량리','동대구','태화강','포항','동해','경주','진주','마산','대전','부산'];
+ const priority=hubs.map(name=>network.find(s=>String(s.name).replace(/역$/u,'')===name)).filter(Boolean);
+ const ordered=[...near.slice(0,3),...priority,...near,...network],seen=new Set();
+ return ordered.filter(s=>byId.has(s.id)&&!seen.has(s.id)&&(seen.add(s.id),true))
+  .slice(0,Math.max(0,Math.min(limit,12)));
 }
 export async function verifyStationDestinations({origin,stations,date,request,signal,limit=8}){
  const candidates=candidateStationsForVerification(origin,stations,limit);
