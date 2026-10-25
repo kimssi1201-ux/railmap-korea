@@ -1,7 +1,7 @@
 import {renderTrainTimetable} from './timetable-view.js';
 import {stationGuideSearch,stationGuideOptionCount} from './station-destination-options.js?v=verified-shortlist-v1';
-import {verifyStationDestinations,candidateStationsForVerification} from './station-verified.js?v=gwangju-destinations-v2';
-import {lookupRegisteredStation} from './station-matching.js?v=gwangju-destinations-v2';
+import {verifyStationDestinations,candidateStationsForVerification} from './station-verified.js?v=sintanjin-mobile-picks-v1';
+import {lookupRegisteredStation} from './station-matching.js?v=sintanjin-mobile-picks-v1';
 import {normalizeName} from './station-utils.js';
 
 const app=document.getElementById('spStationLookup');
