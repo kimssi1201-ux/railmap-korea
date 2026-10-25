@@ -1,6 +1,6 @@
 import {renderTrainTimetable} from './timetable-view.js';
 import {stationGuideSearch,stationGuideOptionCount} from './station-destination-options.js?v=verified-shortlist-v1';
-import {verifyStationDestinations} from './station-verified.js';
+import {verifyStationDestinations,candidateStationsForVerification} from './station-verified.js';
 import {lookupRegisteredStation} from './station-matching.js';
 import {normalizeName} from './station-utils.js';
 
@@ -72,28 +72,32 @@ if(app){
   if(!loaded){hideOptions();return;}
   const query=input.value.trim(),empty=!query;
   if(empty)startVerification();
-  const matches=empty?verified.confirmed.map(x=>x.station):
-   stationGuideSearch(official,from,query,10);
+  const nearby=empty?candidateStationsForVerification({id:from,name:fromName},official,8):[];
   const checked=new Map(verified.confirmed.map(x=>[x.station.id,x.count]));
+  const confirmed=verified.confirmed.map(x=>x.station);
+  const suggestions=nearby.filter(s=>!checked.has(s.id));
+  const matches=empty?[...confirmed,...suggestions].slice(0,10):
+   stationGuideSearch(official,from,query,10);
   options.replaceChildren();
   const hint=document.createElement('p');hint.className='sp-station-options-hint';
   if(empty){
-   hint.textContent=verified.state==='checking'?'선택한 날짜의 직통 목적지를 공식 시간표로 확인 중…':
-    matches.length?'후보 '+verified.checked+'곳 중 직통 '+matches.length+'곳 확인 · 전체 직통 목적지는 아닙니다.':
-    verified.state==='failed'?'직통 목적지 조회가 지연됐습니다. 역 이름을 입력해 개별 조회하세요.':
-    verified.failed||verified.unknown?.length?'후보 조회 중 일부 실패·날짜 불일치 · 역 이름으로 직접 확인하세요':
-    verified.candidates?'확인한 후보 '+verified.checked+'곳에서 직통편 미확인 · 역 이름 직접 검색 가능':
-    '추천 후보가 없습니다. 도착역 이름을 입력해 직접 확인하세요.';
+   const progress=verified.state==='checking'?' · 공식 시간표 확인 중':
+    verified.state==='failed'||verified.failed||verified.unknown?.length?' · 일부 구간 확인 실패':'';
+   hint.textContent=(confirmed.length?'직통 확인 '+confirmed.length+'곳 · ':'')+
+    '같은 노선 참고 '+suggestions.length+'곳'+progress+' · 전체 직통 목록은 아닙니다.';
+   if(!matches.length)hint.textContent='노선 참고 후보가 없습니다. 역 이름을 직접 입력해 시간표를 조회하세요.';
   }else{
    const total=stationGuideOptionCount({id:from,name:fromName},official,query);
-   hint.textContent='등록역 '+total+'곳 중 '+matches.length+'곳 표시 · 직통 운행은 확인 후 표시';
+   hint.textContent='전국 등록역 검색 '+total+'곳 중 '+matches.length+'곳 · 직통 여부는 별도 확인';
   }
   options.append(hint);
   for(const station of matches){
    const button=document.createElement('button');button.type='button';button.setAttribute('role','option');
    const heading=document.createElement('strong');heading.textContent=label(station);
    const info=document.createElement('small');
-   info.textContent=checked.has(station.id)?'직통 '+checked.get(station.id)+'편 확인':station.region||'공식 등록역';
+   info.textContent=checked.has(station.id)?'직통 '+checked.get(station.id)+'편 확인':
+    empty?'노선 참고 · 직통 미확인':(station.region||'공식 등록역')+' · 직통 미확인';
+   if(checked.has(station.id))button.classList.add('sp-option-confirmed');
    button.append(heading,info);
    button.addEventListener('click',()=>selectStation(station));
    options.append(button);
