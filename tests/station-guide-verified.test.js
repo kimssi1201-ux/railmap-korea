@@ -51,7 +51,7 @@ test('station detail keeps one direct timetable search and does not auto-load tr
 test('date-specific official direct shortlist replaces misleading registered-station recommendations',()=>{
  const html=stationDetailHtml(FEATURED_STATIONS[0]);
  assert.doesNotMatch(html,/spVerifiedAlternatives/);
- assert.match(html,/실제 직통편이 확인된 후보역/);
+ assert.match(html,/노선 참고역을 선택하거나/);
  const js=readFileSync(new URL('../station-destination.js',import.meta.url),'utf8');
  assert.match(js,/verifyStationDestinations/);
  assert.match(js,/verified\.confirmed/);
